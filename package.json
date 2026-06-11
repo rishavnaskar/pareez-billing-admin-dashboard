@@ -1,0 +1,38 @@
+{
+  "name": "pareez-billing-admin-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Owner admin dashboard for Pareez Salon — analytics, customers, catalog, staff, birthdays, messaging & exports. Reads the same Firestore database as pareez-billing.",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "seed:demo": "node scripts/seed-demo-data.js"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.7.3",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^2.15.4",
+    "tailwind-merge": "^3.0.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

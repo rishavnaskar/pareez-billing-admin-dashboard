@@ -1,0 +1,163 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared types — kept in sync with the pareez-billing app's src/lib/types.ts.
+// The admin dashboard reads the SAME Firestore project, so these must match.
+// New collections introduced by the dashboard (Product, Employee) are at the end.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  phone?: string;
+  createdAt: Date;
+}
+
+export type MembershipTier = "bronze" | "silver" | "gold" | "platinum";
+export type PaymentMethod = "cash" | "card" | "upi";
+export type DayOfWeek =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
+
+export interface TierConfig {
+  branchId: string;
+  thresholds: Record<MembershipTier, number>;
+  updatedAt: Date;
+}
+
+export interface TierRates {
+  cashbackRate: number; // 0.05 = 5%
+  maxRedemptionRate: number; // 0.10 = 10%
+}
+
+export interface BranchCashbackConfig {
+  branchId: string;
+  welcomeBonus: number;
+  minBillForCashback: number;
+  eligiblePaymentMethodsForDiscount: Record<PaymentMethod, boolean>;
+  dayConfig: Record<DayOfWeek, Record<MembershipTier, TierRates>>;
+  updatedAt: Date;
+}
+
+export interface CustomerWallet {
+  balance: number;
+  lifetimeSpend: number;
+  lifetimeEarned: number;
+  lifetimeRedeemed: number;
+  tier: MembershipTier;
+  tierUpdatedAt: Date;
+  lastActivityAt: Date;
+}
+
+export interface WalletTransaction {
+  id: string;
+  customerId: string;
+  type: "credit" | "debit" | "adjustment" | "welcome_bonus" | "tier_downgrade";
+  amount: number;
+  billId?: string;
+  billNumber?: string;
+  description: string;
+  balanceAfter: number;
+  tierAtTransaction: MembershipTier;
+  createdAt: Date;
+  createdBy?: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone?: string;
+  dateOfBirth?: string; // YYYY-MM-DD
+  wallet: CustomerWallet;
+  createdAt: Date;
+}
+
+export interface ServiceItem {
+  id: string;
+  serviceName: string;
+  price: number;
+  discountAmount: number;
+  staffName?: string;
+}
+
+export interface Bill {
+  id: string;
+  billNumber: string;
+  customerId: string;
+  customerName: string;
+  customerPhone?: string;
+  branchId: string;
+  branchName: string;
+  branchAddress: string;
+  services: ServiceItem[];
+  subtotal: number;
+  discountAmount: number;
+  totalAmount: number;
+  paymentMethod: PaymentMethod;
+  cashbackEarned: number;
+  walletAmountUsed: number;
+  netPayableAmount: number;
+  customerTierAtPurchase: MembershipTier;
+  walletBalanceAfter: number;
+  cashbackRateApplied?: number;
+  maxRedemptionRateApplied?: number;
+  createdAt: Date;
+}
+
+export type UserRole = "admin" | "user";
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName?: string;
+  role: UserRole;
+  branchId?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW collections owned by the admin dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** products/{productId} — the salon service/product catalog. */
+export interface Product {
+  id: string;
+  name: string;
+  category: string; // e.g. "Hair", "Skin", "Spa", "Retail"
+  price: number;
+  durationMinutes?: number; // for services
+  description?: string;
+  sku?: string;
+  active: boolean;
+  branchId?: string; // optional: product limited to a branch ("" / undefined = all)
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** employees/{employeeId} — salon staff. Billing app only stores free-text staffName. */
+export interface Employee {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  dateOfBirth?: string; // YYYY-MM-DD
+  designation?: string; // "Stylist", "Beautician", "Manager"...
+  branchId?: string;
+  joinedAt?: string; // YYYY-MM-DD
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** A unified "has a birthday" record used by the birthdays view. */
+export interface BirthdayPerson {
+  id: string;
+  kind: "customer" | "employee";
+  name: string;
+  phone?: string;
+  dateOfBirth: string; // YYYY-MM-DD
+  meta?: string; // tier for customers, designation for employees
+}
