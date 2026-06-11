@@ -10,6 +10,31 @@ Recharts · jsPDF · SheetJS (xlsx)** — matching the billing app's stack.
 
 ---
 
+## 📸 Screenshots
+
+### Dashboard — salon performance at a glance
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Analytics — revenue, bills & customer growth over time
+![Analytics](docs/screenshots/analytics.png)
+
+### Analytics — revenue by branch, top staff & loyalty snapshot
+![Analytics – loyalty](docs/screenshots/analytics-loyalty.png)
+
+### Bills — searchable bill history with filters & exports
+![Bills](docs/screenshots/bills.png)
+
+### Messaging Center — WhatsApp templates & audience segments
+![Messaging](docs/screenshots/messaging.png)
+
+### Exports — download Excel / PDF reports & full workbook
+![Exports](docs/screenshots/exports.png)
+
+### Settings — tier thresholds, cashback basics & Google Sheets
+![Settings](docs/screenshots/settings.png)
+
+---
+
 ## ✨ Features
 
 ### 📊 Dashboard & Analytics
