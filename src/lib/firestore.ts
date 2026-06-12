@@ -6,6 +6,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   setDoc,
   query,
   where,
@@ -191,8 +192,12 @@ export async function getProducts(): Promise<Product[]> {
 export async function createProduct(
   data: Omit<Product, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  // Firestore rejects `undefined` values — drop empty optional fields
+  const clean = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
   const ref = await addDoc(collection(db, "products"), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -203,7 +208,11 @@ export async function updateProduct(
   id: string,
   data: Partial<Omit<Product, "id" | "createdAt">>
 ): Promise<void> {
-  await updateDoc(doc(db, "products", id), { ...data, updatedAt: serverTimestamp() });
+  // Firestore rejects `undefined` values — treat them as "clear this field"
+  const clean = Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v])
+  );
+  await updateDoc(doc(db, "products", id), { ...clean, updatedAt: serverTimestamp() });
 }
 
 export async function deleteProduct(id: string): Promise<void> {
@@ -237,8 +246,12 @@ export async function getEmployees(): Promise<Employee[]> {
 export async function createEmployee(
   data: Omit<Employee, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  // Firestore rejects `undefined` values — drop empty optional fields
+  const clean = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
   const ref = await addDoc(collection(db, "employees"), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -249,7 +262,11 @@ export async function updateEmployee(
   id: string,
   data: Partial<Omit<Employee, "id" | "createdAt">>
 ): Promise<void> {
-  await updateDoc(doc(db, "employees", id), { ...data, updatedAt: serverTimestamp() });
+  // Firestore rejects `undefined` values — treat them as "clear this field"
+  const clean = Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, v === undefined ? deleteField() : v])
+  );
+  await updateDoc(doc(db, "employees", id), { ...clean, updatedAt: serverTimestamp() });
 }
 
 export async function deleteEmployee(id: string): Promise<void> {
