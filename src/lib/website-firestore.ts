@@ -46,8 +46,8 @@ function mapWebEvent(id: string, data: DocumentData): WebEvent {
   };
 }
 
-/** Events since `start`, newest first. Capped — a salon site stays well under this. */
-export async function getWebEvents(start: Date, max = 20000): Promise<WebEvent[]> {
+/** Events since `start`, newest first. 10k is Firestore's max limit — a salon site stays well under it. */
+export async function getWebEvents(start: Date, max = 10000): Promise<WebEvent[]> {
   const snap = await getDocs(
     query(
       collection(db, "webEvents"),
