@@ -48,9 +48,13 @@ const CONTACT_TYPES = new Set(["whatsapp_click", "call_click", "booking_submitte
 
 export function computeWebKpis(events: WebEvent[], bookingsInRange: number): WebKpis {
   const views = events.filter((e) => e.type === "pageview");
-  const sessions = new Set(views.map((e) => e.sessionId)).size;
+  const sessionIds = new Set(views.map((e) => e.sessionId));
+  const sessions = sessionIds.size;
+  // only count conversions from sessions we saw a pageview for, so the rate can't exceed 100%
   const convertedSessions = new Set(
-    events.filter((e) => CONTACT_TYPES.has(e.type)).map((e) => e.sessionId)
+    events
+      .filter((e) => CONTACT_TYPES.has(e.type) && sessionIds.has(e.sessionId))
+      .map((e) => e.sessionId)
   ).size;
   return {
     pageViews: views.length,
