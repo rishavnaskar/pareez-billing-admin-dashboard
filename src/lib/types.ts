@@ -126,7 +126,8 @@ export interface UserProfile {
 export interface Product {
   id: string;
   name: string;
-  category: string; // e.g. "Hair", "Skin", "Spa", "Retail"
+  category: string; // subcategory, e.g. "Hair Cut", "Facial Treatments"
+  section?: "Men's" | "Women's" | "Unisex"; // top-level grouping
   price: number;
   durationMinutes?: number; // for services
   description?: string;

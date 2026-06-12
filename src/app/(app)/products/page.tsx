@@ -10,7 +10,6 @@ import {
   FileSpreadsheet,
   FileText,
   Tag,
-  ToggleLeft,
   ToggleRight,
 } from "lucide-react";
 
@@ -25,11 +24,7 @@ import { LoadingState, EmptyState } from "@/components/ui/misc";
 import { Dialog } from "@/components/ui/dialog";
 import { StatCard } from "@/components/StatCard";
 
-import {
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "@/lib/firestore";
+import { createProduct, updateProduct, deleteProduct } from "@/lib/firestore";
 import { formatINR, formatNumber } from "@/lib/currency";
 import { exportToExcel, exportToPDF, type TableColumn } from "@/lib/export";
 import type { Product } from "@/lib/types";
@@ -37,6 +32,7 @@ import type { Product } from "@/lib/types";
 // ── export columns ────────────────────────────────────────────────────────────
 const productColumns: TableColumn<Product>[] = [
   { header: "Name", value: (p) => p.name },
+  { header: "Section", value: (p) => p.section ?? "" },
   { header: "Category", value: (p) => p.category },
   { header: "SKU", value: (p) => p.sku ?? "" },
   { header: "Price", value: (p) => p.price },
@@ -45,8 +41,36 @@ const productColumns: TableColumn<Product>[] = [
   { header: "Description", value: (p) => p.description ?? "" },
 ];
 
-// ── category tone ─────────────────────────────────────────────────────────────
+// ── section / category tones ──────────────────────────────────────────────────
+const SECTION_TONES: Record<string, "brand" | "blue" | "green" | "amber" | "purple" | "slate" | "red"> = {
+  "Men's": "blue",
+  "Women's": "purple",
+  "Unisex": "green",
+};
+
 const CATEGORY_TONES: Record<string, "brand" | "blue" | "green" | "amber" | "purple" | "slate" | "red"> = {
+  "Hair Cut": "brand",
+  "Shaving, Trim & Style": "slate",
+  "Hair Style": "brand",
+  "Hair Color": "amber",
+  "Hair Spa & Treatments": "blue",
+  "Hair Cut, Style & Treatments": "brand",
+  "Make-Up": "purple",
+  "Pre-Bridal Package": "purple",
+  "Pre-Groom Package": "blue",
+  "Normal Waxing": "green",
+  "Roll-On Wax": "green",
+  "Lipo Wax": "green",
+  "Threading": "slate",
+  "De-Tan": "amber",
+  "Clean-Up": "green",
+  "Korean Facial": "purple",
+  "Facial Treatments": "green",
+  "Advanced Facials": "purple",
+  "Hydra Facial": "blue",
+  "Pedicure": "brand",
+  "Manicure": "brand",
+  "Bodycare": "blue",
   Hair: "brand",
   Skin: "green",
   Spa: "blue",
@@ -57,17 +81,47 @@ const CATEGORY_TONES: Record<string, "brand" | "blue" | "green" | "amber" | "pur
   Retail: "slate",
 };
 
+function sectionTone(s?: string): "brand" | "blue" | "green" | "amber" | "purple" | "slate" | "red" {
+  return s ? (SECTION_TONES[s] ?? "slate") : "slate";
+}
+
 function categoryTone(cat: string): "brand" | "blue" | "green" | "amber" | "purple" | "slate" | "red" {
   return CATEGORY_TONES[cat] ?? "slate";
 }
 
-// ── salon categories hint list ─────────────────────────────────────────────
-const SALON_CATEGORIES = ["Hair", "Skin", "Spa", "Nails", "Beard", "Makeup", "Massage", "Retail"];
+// ── sections & categories hints ───────────────────────────────────────────────
+const SECTIONS = ["Men's", "Women's", "Unisex"] as const;
+
+const SALON_CATEGORIES = [
+  "Hair Cut",
+  "Shaving, Trim & Style",
+  "Hair Style",
+  "Hair Color",
+  "Hair Spa & Treatments",
+  "Hair Cut, Style & Treatments",
+  "Make-Up",
+  "Pre-Bridal Package",
+  "Pre-Groom Package",
+  "Normal Waxing",
+  "Roll-On Wax",
+  "Lipo Wax",
+  "Threading",
+  "De-Tan",
+  "Clean-Up",
+  "Korean Facial",
+  "Facial Treatments",
+  "Advanced Facials",
+  "Hydra Facial",
+  "Pedicure",
+  "Manicure",
+  "Bodycare",
+];
 
 // ── blank form ────────────────────────────────────────────────────────────────
 interface ProductForm {
   name: string;
   category: string;
+  section: string;
   price: string;
   durationMinutes: string;
   sku: string;
@@ -80,6 +134,7 @@ function blankForm(): ProductForm {
   return {
     name: "",
     category: "",
+    section: "",
     price: "",
     durationMinutes: "",
     sku: "",
@@ -93,6 +148,7 @@ function productToForm(p: Product): ProductForm {
   return {
     name: p.name,
     category: p.category,
+    section: p.section ?? "",
     price: String(p.price),
     durationMinutes: p.durationMinutes != null ? String(p.durationMinutes) : "",
     sku: p.sku ?? "",
@@ -109,6 +165,7 @@ export default function ProductsPage() {
 
   // filters
   const [search, setSearch] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
@@ -142,14 +199,16 @@ export default function ProductsPage() {
         !q ||
         p.name.toLowerCase().includes(q) ||
         (p.sku ?? "").toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q);
+        p.category.toLowerCase().includes(q) ||
+        (p.section ?? "").toLowerCase().includes(q);
+      const matchSection = sectionFilter === "all" || p.section === sectionFilter;
       const matchCategory = categoryFilter === "all" || p.category === categoryFilter;
       const matchStatus =
         statusFilter === "all" ||
         (statusFilter === "active" ? p.active : !p.active);
-      return matchSearch && matchCategory && matchStatus;
+      return matchSearch && matchSection && matchCategory && matchStatus;
     });
-  }, [products, search, categoryFilter, statusFilter]);
+  }, [products, search, sectionFilter, categoryFilter, statusFilter]);
 
   // ── open add/edit dialog ──
   function openAdd() {
@@ -190,6 +249,7 @@ export default function ProductsPage() {
     const payload = {
       name: form.name.trim(),
       category: form.category.trim() || "Uncategorized",
+      section: (form.section || undefined) as "Men's" | "Women's" | "Unisex" | undefined,
       price,
       durationMinutes: durationMinutes && !isNaN(durationMinutes) ? durationMinutes : undefined,
       sku: form.sku.trim() || undefined,
@@ -239,7 +299,7 @@ export default function ProductsPage() {
       {/* stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label="Total Products"
+          label="Total Services"
           value={formatNumber(totalProducts)}
           icon={<Package className="h-5 w-5" />}
           tone="brand"
@@ -282,7 +342,17 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            <div className="w-40">
+            <div className="w-36">
+              <Label>Section</Label>
+              <Select value={sectionFilter} onChange={(e) => setSectionFilter(e.target.value)}>
+                <option value="all">All sections</option>
+                {SECTIONS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="w-48">
               <Label>Category</Label>
               <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
                 <option value="all">All categories</option>
@@ -306,14 +376,14 @@ export default function ProductsPage() {
 
             <Button variant="primary" size="md" onClick={openAdd}>
               <Plus className="h-4 w-4" />
-              Add Product
+              Add Service
             </Button>
 
             <Button
               variant="outline"
               size="md"
               onClick={() => {
-                exportToExcel(filtered, productColumns, "products");
+                exportToExcel(filtered, productColumns, "services");
                 toast("Excel exported.", "success");
               }}
             >
@@ -324,8 +394,8 @@ export default function ProductsPage() {
               variant="outline"
               size="md"
               onClick={() => {
-                exportToPDF(filtered, productColumns, "products", {
-                  title: "Product / Service Catalog",
+                exportToPDF(filtered, productColumns, "services", {
+                  title: "Service Catalog",
                   summary: [
                     { label: "Total", value: String(filtered.length) },
                     { label: "Active", value: String(filtered.filter((p) => p.active).length) },
@@ -340,7 +410,7 @@ export default function ProductsPage() {
           </div>
 
           <p className="mt-3 text-xs text-muted">
-            Showing {filtered.length} of {products.length} products
+            Showing {filtered.length} of {products.length} services
           </p>
         </CardContent>
       </Card>
@@ -351,12 +421,12 @@ export default function ProductsPage() {
           {products.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                title="No products yet"
-                description="Add your first product or service to the catalog."
+                title="No services yet"
+                description="Add a service to the catalog."
                 action={
                   <Button variant="primary" onClick={openAdd}>
                     <Plus className="h-4 w-4" />
-                    Add your first product
+                    Add service
                   </Button>
                 }
               />
@@ -364,7 +434,7 @@ export default function ProductsPage() {
           ) : filtered.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                title="No products found"
+                title="No services found"
                 description="Try adjusting your search or filters."
               />
             </div>
@@ -373,8 +443,8 @@ export default function ProductsPage() {
               <THead>
                 <TR>
                   <TH>Name</TH>
+                  <TH>Section</TH>
                   <TH>Category</TH>
-                  <TH>SKU</TH>
                   <TH>Price</TH>
                   <TH>Duration</TH>
                   <TH>Status</TH>
@@ -393,9 +463,15 @@ export default function ProductsPage() {
                       </div>
                     </TD>
                     <TD>
+                      {p.section ? (
+                        <Badge tone={sectionTone(p.section)}>{p.section}</Badge>
+                      ) : (
+                        <span className="text-muted text-sm">—</span>
+                      )}
+                    </TD>
+                    <TD>
                       <Badge tone={categoryTone(p.category)}>{p.category}</Badge>
                     </TD>
-                    <TD className="font-mono text-xs text-muted">{p.sku ?? "—"}</TD>
                     <TD className="font-semibold text-slate-900">{formatINR(p.price)}</TD>
                     <TD className="text-muted text-sm">
                       {p.durationMinutes ? `${p.durationMinutes} min` : "—"}
@@ -440,8 +516,8 @@ export default function ProductsPage() {
       <Dialog
         open={formOpen}
         onClose={closeForm}
-        title={editing ? "Edit Product" : "Add Product"}
-        description={editing ? `Editing "${editing.name}"` : "Add a new product or service to the catalog."}
+        title={editing ? "Edit Service" : "Add Service"}
+        description={editing ? `Editing "${editing.name}"` : "Add a new service to the catalog."}
         size="lg"
         footer={
           <>
@@ -449,7 +525,7 @@ export default function ProductsPage() {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleSubmit} disabled={saving}>
-              {saving ? "Saving…" : editing ? "Save Changes" : "Create Product"}
+              {saving ? "Saving…" : editing ? "Save Changes" : "Create Service"}
             </Button>
           </>
         }
@@ -461,10 +537,20 @@ export default function ProductsPage() {
                 Name <span className="text-red-500">*</span>
               </Label>
               <Input
-                placeholder="e.g. Deep Conditioning Treatment"
+                placeholder="e.g. Moroccan Hair Spa"
                 value={form.name}
                 onChange={(e) => setField("name", e.target.value)}
               />
+            </div>
+
+            <div>
+              <Label>Section</Label>
+              <Select value={form.section} onChange={(e) => setField("section", e.target.value)}>
+                <option value="">— select section —</option>
+                {SECTIONS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
             </div>
 
             <div>
@@ -473,7 +559,7 @@ export default function ProductsPage() {
               </Label>
               <Input
                 list="salon-categories"
-                placeholder="e.g. Hair, Skin, Spa…"
+                placeholder="e.g. Hair Spa & Treatments"
                 value={form.category}
                 onChange={(e) => setField("category", e.target.value)}
               />
@@ -491,8 +577,8 @@ export default function ProductsPage() {
               <Input
                 type="number"
                 min="0"
-                step="0.01"
-                placeholder="0.00"
+                step="1"
+                placeholder="0"
                 value={form.price}
                 onChange={(e) => setField("price", e.target.value)}
               />
@@ -519,7 +605,7 @@ export default function ProductsPage() {
               />
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
               <Label>Branch</Label>
               <Select
                 value={form.branchId}
@@ -535,8 +621,8 @@ export default function ProductsPage() {
             <div className="sm:col-span-2">
               <Label>Description</Label>
               <Textarea
-                rows={3}
-                placeholder="Optional description of the product or service…"
+                rows={2}
+                placeholder="Optional description…"
                 value={form.description}
                 onChange={(e) => setField("description", e.target.value)}
               />
@@ -551,7 +637,7 @@ export default function ProductsPage() {
                   onChange={(e) => setField("active", e.target.checked)}
                 />
                 <span className="text-sm font-medium text-slate-700">Active</span>
-                <span className="text-xs text-muted">(visible in billing app)</span>
+                <span className="text-xs text-muted">(visible in billing app suggestions)</span>
               </label>
             </div>
           </div>
@@ -562,7 +648,7 @@ export default function ProductsPage() {
       <Dialog
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Delete Product"
+        title="Delete Service"
         description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
         size="sm"
         footer={
@@ -583,6 +669,7 @@ export default function ProductsPage() {
           </p>
         </div>
       </Dialog>
+
     </div>
   );
 }

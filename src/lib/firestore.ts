@@ -169,6 +169,7 @@ function mapProduct(id: string, data: DocumentData): Product {
     id,
     name: data.name ?? "",
     category: data.category ?? "Uncategorized",
+    section: data.section,
     price: num(data.price),
     durationMinutes: data.durationMinutes,
     description: data.description,
