@@ -8,6 +8,7 @@ import {
   Cake,
   MessageCircle,
   BarChart3,
+  Globe,
   FileDown,
   Settings,
 } from "lucide-react";
@@ -22,6 +23,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
   { href: "/analytics", label: "Analytics", icon: BarChart3, group: "Overview" },
+  { href: "/website", label: "Website", icon: Globe, group: "Overview" },
   { href: "/customers", label: "Customers", icon: Users, group: "Operations" },
   { href: "/bills", label: "Bills", icon: ReceiptText, group: "Operations" },
   { href: "/products", label: "Catalog", icon: Package, group: "Catalog & Team" },

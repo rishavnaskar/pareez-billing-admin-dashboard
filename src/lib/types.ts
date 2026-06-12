@@ -161,3 +161,48 @@ export interface BirthdayPerson {
   dateOfBirth: string; // YYYY-MM-DD
   meta?: string; // tier for customers, designation for employees
 }
+
+// ── Website analytics (written anonymously by pareezsalon.com) ───────────────
+
+export type WebEventType =
+  | "pageview"
+  | "whatsapp_click"
+  | "call_click"
+  | "directions_click"
+  | "instagram_click"
+  | "facebook_click"
+  | "booking_submitted";
+
+/** webEvents/{eventId} — one anonymous interaction on the website. */
+export interface WebEvent {
+  id: string;
+  type: WebEventType;
+  path: string;
+  label: string;
+  sessionId: string;
+  visitorId: string;
+  device: "mobile" | "tablet" | "desktop" | string;
+  referrer: string; // external referrer hostname, "" = direct/internal
+  utmSource: string;
+  utmMedium: string;
+  utmCampaign: string;
+  ts: Date;
+}
+
+export type WebBookingStatus = "new" | "contacted" | "booked" | "closed";
+
+/** webBookings/{bookingId} — appointment request from the website form. */
+export interface WebBooking {
+  id: string;
+  name: string;
+  phone: string;
+  branchId: string;
+  branchName: string;
+  service: string;
+  date: string; // requested date, YYYY-MM-DD
+  time: string; // requested slot, e.g. "5:00 PM"
+  notes: string;
+  status: WebBookingStatus;
+  device: string;
+  createdAt: Date;
+}
