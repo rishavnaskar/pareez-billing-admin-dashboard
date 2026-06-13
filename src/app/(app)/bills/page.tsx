@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Fragment, useState, useMemo } from "react";
 import {
   Receipt,
   TrendingUp,
@@ -249,6 +249,48 @@ export default function BillsPage() {
   const displayed = filtered.slice(0, MAX_ROWS);
   const isTruncated = filtered.length > MAX_ROWS;
 
+  // Group the visible bills by calendar day, with per-day Total/Cash/Card/UPI
+  // sums — mirrors the day sections in the billing app's Recent Bills.
+  const dayGroups = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        dayStart: number;
+        bills: Bill[];
+        totals: { overall: number; cash: number; card: number; upi: number };
+      }
+    >();
+    for (const b of displayed) {
+      const d = b.createdAt;
+      const key = format(d, "dd MMM yyyy");
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          dayStart: new Date(
+            d.getFullYear(),
+            d.getMonth(),
+            d.getDate()
+          ).getTime(),
+          bills: [],
+          totals: { overall: 0, cash: 0, card: 0, upi: 0 },
+        };
+        map.set(key, group);
+      }
+      group.bills.push(b);
+      group.totals.overall += b.totalAmount;
+      group.totals[b.paymentMethod] += b.totalAmount;
+    }
+    return Array.from(map.entries())
+      .map(([day, data]) => ({
+        day,
+        ...data,
+        bills: [...data.bills].sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        ),
+      }))
+      .sort((a, b) => b.dayStart - a.dayStart);
+  }, [displayed]);
+
   if (isLoading && bills.length === 0) return <LoadingState />;
 
   return (
@@ -407,65 +449,86 @@ export default function BillsPage() {
                 </TR>
               </THead>
               <TBody>
-                {displayed.map((b) => {
-                  const serviceNames = b.services
-                    .map((s) => s.serviceName)
-                    .join(", ");
-                  const truncated =
-                    serviceNames.length > 40
-                      ? serviceNames.slice(0, 40) + "…"
-                      : serviceNames;
-                  return (
-                    <TR
-                      key={b.id}
-                      className="cursor-pointer"
-                      onClick={() => setSelectedBill(b)}
-                    >
-                      <TD className="font-mono text-xs text-brand-600">
-                        {b.billNumber}
-                      </TD>
-                      <TD className="whitespace-nowrap text-xs text-muted">
-                        {format(b.createdAt, "dd MMM yyyy HH:mm")}
-                      </TD>
-                      <TD className="font-medium text-slate-900 max-w-[140px] truncate">
-                        {b.customerName}
-                      </TD>
-                      <TD className="text-xs text-muted max-w-[100px] truncate">
-                        {b.branchName}
-                      </TD>
-                      <TD className="text-xs text-muted max-w-[160px] truncate">
-                        {truncated}
-                      </TD>
-                      <TD className="text-right font-semibold">
-                        {formatINR(b.totalAmount)}
-                      </TD>
-                      <TD className="text-right text-brand-600 text-xs">
-                        {b.walletAmountUsed > 0
-                          ? `- ${formatINR(b.walletAmountUsed)}`
-                          : "—"}
-                      </TD>
-                      <TD className="text-right font-bold text-slate-900">
-                        {formatINR(b.netPayableAmount || b.totalAmount)}
-                      </TD>
-                      <TD className="text-right text-emerald-600 text-xs">
-                        {b.cashbackEarned > 0
-                          ? `+ ${formatINR(b.cashbackEarned)}`
-                          : "—"}
-                      </TD>
-                      <TD>
-                        <Badge
-                          tone={paymentTone(b.paymentMethod)}
-                          className="uppercase"
-                        >
-                          {b.paymentMethod}
-                        </Badge>
-                      </TD>
-                      <TD>
-                        <TierBadge tier={b.customerTierAtPurchase} />
+                {dayGroups.map((group) => (
+                  <Fragment key={group.day}>
+                    <TR className="bg-slate-50 hover:bg-slate-50">
+                      <TD colSpan={11} className="py-2">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                          <span className="text-sm font-semibold text-slate-900">
+                            {group.day}
+                          </span>
+                          <span className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                            <span className="font-medium text-slate-800">
+                              Total: {formatINR(group.totals.overall)}
+                            </span>
+                            <span>Cash: {formatINR(group.totals.cash)}</span>
+                            <span>Card: {formatINR(group.totals.card)}</span>
+                            <span>UPI: {formatINR(group.totals.upi)}</span>
+                          </span>
+                        </div>
                       </TD>
                     </TR>
-                  );
-                })}
+                    {group.bills.map((b) => {
+                      const serviceNames = b.services
+                        .map((s) => s.serviceName)
+                        .join(", ");
+                      const truncated =
+                        serviceNames.length > 40
+                          ? serviceNames.slice(0, 40) + "…"
+                          : serviceNames;
+                      return (
+                        <TR
+                          key={b.id}
+                          className="cursor-pointer"
+                          onClick={() => setSelectedBill(b)}
+                        >
+                          <TD className="font-mono text-xs text-brand-600">
+                            {b.billNumber}
+                          </TD>
+                          <TD className="whitespace-nowrap text-xs text-muted">
+                            {format(b.createdAt, "dd MMM yyyy HH:mm")}
+                          </TD>
+                          <TD className="font-medium text-slate-900 max-w-[140px] truncate">
+                            {b.customerName}
+                          </TD>
+                          <TD className="text-xs text-muted max-w-[100px] truncate">
+                            {b.branchName}
+                          </TD>
+                          <TD className="text-xs text-muted max-w-[160px] truncate">
+                            {truncated}
+                          </TD>
+                          <TD className="text-right font-semibold">
+                            {formatINR(b.totalAmount)}
+                          </TD>
+                          <TD className="text-right text-brand-600 text-xs">
+                            {b.walletAmountUsed > 0
+                              ? `- ${formatINR(b.walletAmountUsed)}`
+                              : "—"}
+                          </TD>
+                          <TD className="text-right font-bold text-slate-900">
+                            {formatINR(b.netPayableAmount || b.totalAmount)}
+                          </TD>
+                          <TD className="text-right text-emerald-600 text-xs">
+                            {b.cashbackEarned > 0
+                              ? `+ ${formatINR(b.cashbackEarned)}`
+                              : "—"}
+                          </TD>
+                          <TD>
+                            <Badge
+                              tone={paymentTone(b.paymentMethod)}
+                              className="uppercase"
+                            >
+                              {b.paymentMethod}
+                            </Badge>
+                          </TD>
+                          <TD>
+                            <TierBadge tier={b.customerTierAtPurchase} />
+                          </TD>
+                        </TR>
+                      );
+                    })}
+                  </Fragment>
+                ))}
               </TBody>
             </Table>
           )}
