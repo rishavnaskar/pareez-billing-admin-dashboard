@@ -148,6 +148,9 @@ export interface Employee {
   designation?: string; // "Stylist", "Beautician", "Manager"...
   branchId?: string;
   joinedAt?: string; // YYYY-MM-DD
+  // Commission rate (percent) applied to all services this employee performs,
+  // used to compute their month-wise incentive from matching bill services.
+  commissionPercent?: number;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;

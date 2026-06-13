@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   FileText,
   MessageCircle,
+  TrendingUp,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -34,9 +35,9 @@ import {
   deleteEmployee,
 } from "@/lib/firestore";
 import { ageFromDob, daysUntilBirthday, isBirthdayOn } from "@/lib/analytics";
-import { formatNumber } from "@/lib/currency";
+import { formatNumber, formatINR } from "@/lib/currency";
 import { exportToExcel, exportToPDF, type TableColumn } from "@/lib/export";
-import type { Employee } from "@/lib/types";
+import type { Bill, Employee, ServiceItem } from "@/lib/types";
 
 // ── export columns ────────────────────────────────────────────────────────────
 const employeeColumns: TableColumn<Employee>[] = [
@@ -47,8 +48,99 @@ const employeeColumns: TableColumn<Employee>[] = [
   { header: "Date of Birth", value: (e) => e.dateOfBirth ?? "" },
   { header: "Joined", value: (e) => e.joinedAt ?? "" },
   { header: "Branch", value: (e) => e.branchId ?? "" },
+  {
+    header: "Commission %",
+    value: (e) => (e.commissionPercent != null ? String(e.commissionPercent) : ""),
+  },
   { header: "Active", value: (e) => (e.active ? "Yes" : "No") },
 ];
+
+// ── employee incentive (commission) computation ───────────────────────────────
+// Bills attribute work via the free-text staffName on each service. We match an
+// employee by name (case-insensitive) and base commission on the net service
+// amount (price − discount) of the services they performed.
+interface IncentiveBill {
+  bill: Bill;
+  services: ServiceItem[]; // this employee's services on the bill
+  serviceAmount: number; // net amount of those services
+}
+
+interface IncentiveMonth {
+  key: string; // "2026-06" — sort key
+  label: string; // "June 2026"
+  serviceAmount: number;
+  commission: number;
+  bills: IncentiveBill[];
+}
+
+// One pass over all bills builds an index keyed by lowercased staff name →
+// month key → accumulated services, so each employee's breakdown is a cheap
+// lookup regardless of how many staff or bills exist.
+type IncentiveIndex = Map<
+  string,
+  Map<string, { label: string; serviceAmount: number; bills: IncentiveBill[] }>
+>;
+
+function buildIncentiveIndex(bills: Bill[]): IncentiveIndex {
+  const index: IncentiveIndex = new Map();
+  for (const bill of bills) {
+    // Group this bill's services by the staff who performed them.
+    const byStaff = new Map<string, ServiceItem[]>();
+    for (const s of bill.services) {
+      const name = (s.staffName ?? "").trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      const list = byStaff.get(key);
+      if (list) list.push(s);
+      else byStaff.set(key, [s]);
+    }
+    if (byStaff.size === 0) continue;
+
+    const monthKey = format(bill.createdAt, "yyyy-MM");
+    const monthLabel = format(bill.createdAt, "MMMM yyyy");
+    for (const [staffKey, services] of byStaff) {
+      const serviceAmount = services.reduce(
+        (sum, s) => sum + (s.price - (s.discountAmount || 0)),
+        0
+      );
+      let months = index.get(staffKey);
+      if (!months) {
+        months = new Map();
+        index.set(staffKey, months);
+      }
+      let month = months.get(monthKey);
+      if (!month) {
+        month = { label: monthLabel, serviceAmount: 0, bills: [] };
+        months.set(monthKey, month);
+      }
+      month.serviceAmount += serviceAmount;
+      month.bills.push({ bill, services, serviceAmount });
+    }
+  }
+  return index;
+}
+
+// Resolve an employee's month-wise incentive from the prebuilt index, applying
+// their commission percent. Months are newest-first; bills within newest-first.
+function monthsForEmployee(
+  employee: Employee,
+  index: IncentiveIndex
+): IncentiveMonth[] {
+  const pct = employee.commissionPercent ?? 0;
+  const months = index.get(employee.name.trim().toLowerCase());
+  if (!months) return [];
+  return Array.from(months.entries())
+    .map(([key, v]) => ({
+      key,
+      label: v.label,
+      serviceAmount: v.serviceAmount,
+      commission: Math.round((v.serviceAmount * pct) / 100),
+      bills: [...v.bills].sort(
+        (a, b) => b.bill.createdAt.getTime() - a.bill.createdAt.getTime()
+      ),
+    }))
+    .sort((a, b) => (a.key < b.key ? 1 : -1));
+}
 
 // ── designation hint list ─────────────────────────────────────────────────────
 const DESIGNATIONS = [
@@ -71,6 +163,7 @@ interface EmployeeForm {
   dateOfBirth: string;
   joinedAt: string;
   branchId: string;
+  commissionPercent: string;
   active: boolean;
 }
 
@@ -83,6 +176,7 @@ function blankForm(): EmployeeForm {
     dateOfBirth: "",
     joinedAt: "",
     branchId: "",
+    commissionPercent: "",
     active: true,
   };
 }
@@ -96,6 +190,8 @@ function employeeToForm(e: Employee): EmployeeForm {
     dateOfBirth: e.dateOfBirth ?? "",
     joinedAt: e.joinedAt ?? "",
     branchId: e.branchId ?? "",
+    commissionPercent:
+      e.commissionPercent != null ? String(e.commissionPercent) : "",
     active: e.active,
   };
 }
@@ -124,7 +220,7 @@ function BirthdayChip({ dob }: { dob: string }) {
 
 // ── main page ─────────────────────────────────────────────────────────────────
 export default function EmployeesPage() {
-  const { employees, branches, isLoading, refreshEmployees } = useData();
+  const { employees, branches, bills, isLoading, refreshEmployees } = useData();
   const toast = useToast();
 
   // filters
@@ -194,6 +290,20 @@ export default function EmployeesPage() {
     [branches]
   );
 
+  // ── incentive index (built once from all bills) ──
+  const incentiveIndex = useMemo(() => buildIncentiveIndex(bills), [bills]);
+  const currentMonthKey = format(new Date(), "yyyy-MM");
+
+  // incentive breakdown dialog
+  const [incentiveTarget, setIncentiveTarget] = useState<Employee | null>(null);
+  const incentiveMonths = useMemo(
+    () =>
+      incentiveTarget
+        ? monthsForEmployee(incentiveTarget, incentiveIndex)
+        : [],
+    [incentiveTarget, incentiveIndex]
+  );
+
   // ── open add/edit ──
   function openAdd() {
     setEditing(null);
@@ -224,6 +334,16 @@ export default function EmployeesPage() {
       return;
     }
 
+    let commissionPercent: number | undefined;
+    if (form.commissionPercent.trim()) {
+      const pct = Number(form.commissionPercent);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+        toast("Commission % must be a number between 0 and 100.", "error");
+        return;
+      }
+      commissionPercent = pct;
+    }
+
     const payload = {
       name: form.name.trim(),
       designation: form.designation.trim() || undefined,
@@ -232,6 +352,7 @@ export default function EmployeesPage() {
       dateOfBirth: form.dateOfBirth || undefined,
       joinedAt: form.joinedAt || undefined,
       branchId: form.branchId || undefined,
+      commissionPercent,
       active: form.active,
     };
 
@@ -443,6 +564,7 @@ export default function EmployeesPage() {
                   <TH>Age / Birthday</TH>
                   <TH>Joined</TH>
                   <TH>Branch</TH>
+                  <TH>Incentive</TH>
                   <TH>Status</TH>
                   <TH>Actions</TH>
                 </TR>
@@ -450,6 +572,8 @@ export default function EmployeesPage() {
               <TBody>
                 {filtered.map((e) => {
                   const age = ageFromDob(e.dateOfBirth);
+                  const months = monthsForEmployee(e, incentiveIndex);
+                  const thisMonth = months.find((m) => m.key === currentMonthKey);
                   return (
                     <TR key={e.id}>
                       <TD className="font-medium text-slate-900">{e.name}</TD>
@@ -508,6 +632,18 @@ export default function EmployeesPage() {
                         {e.branchId ? (branchById.get(e.branchId) ?? e.branchId) : "All"}
                       </TD>
                       <TD>
+                        {e.commissionPercent != null && e.commissionPercent > 0 ? (
+                          <div className="space-y-0.5">
+                            <Badge tone="purple">{e.commissionPercent}%</Badge>
+                            <div className="text-xs text-muted whitespace-nowrap">
+                              {formatINR(thisMonth?.commission ?? 0)} · this mo
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted text-xs">No commission set</span>
+                        )}
+                      </TD>
+                      <TD>
                         {e.active ? (
                           <Badge tone="green">Active</Badge>
                         ) : (
@@ -516,6 +652,14 @@ export default function EmployeesPage() {
                       </TD>
                       <TD>
                         <div className="flex gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setIncentiveTarget(e)}
+                            title="Monthly incentive"
+                          >
+                            <TrendingUp className="h-3.5 w-3.5" />
+                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
@@ -639,6 +783,23 @@ export default function EmployeesPage() {
             </div>
 
             <div className="sm:col-span-2">
+              <Label>Commission % (on all services)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                placeholder="e.g. 10"
+                value={form.commissionPercent}
+                onChange={(e) => setField("commissionPercent", e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted">
+                Applied to the net amount (price − discount) of every service
+                this employee performs. Used to compute their monthly incentive.
+              </p>
+            </div>
+
+            <div className="sm:col-span-2">
               <Label>Branch</Label>
               <Select
                 value={form.branchId}
@@ -702,6 +863,133 @@ export default function EmployeesPage() {
         }}
         recipient={msgRecipient}
       />
+
+      {/* monthly incentive breakdown dialog */}
+      <Dialog
+        open={!!incentiveTarget}
+        onClose={() => setIncentiveTarget(null)}
+        size="lg"
+        title={`Incentive — ${incentiveTarget?.name ?? ""}`}
+        description={
+          incentiveTarget?.commissionPercent
+            ? `${incentiveTarget.commissionPercent}% commission on net service amount`
+            : "No commission % set for this employee yet"
+        }
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIncentiveTarget(null)}>
+              Close
+            </Button>
+            {incentiveTarget && (
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const emp = incentiveTarget;
+                  setIncentiveTarget(null);
+                  openEdit(emp);
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+                {incentiveTarget.commissionPercent
+                  ? "Edit commission %"
+                  : "Set commission %"}
+              </Button>
+            )}
+          </>
+        }
+      >
+        {incentiveTarget &&
+          (incentiveMonths.length === 0 ? (
+            <EmptyState
+              title="No attributed bills"
+              description={`No bills list ${incentiveTarget.name} as the staff member yet. Staff is matched by name on each bill's services.`}
+            />
+          ) : (
+            <div className="space-y-4">
+              {(incentiveTarget.commissionPercent ?? 0) === 0 && (
+                <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Set a commission % for this employee to turn the service totals
+                  below into a payable incentive.
+                </div>
+              )}
+
+              {/* all-time totals */}
+              <div className="flex flex-wrap gap-6 rounded-xl border border-line bg-slate-50 px-4 py-3 text-sm">
+                <div>
+                  <div className="text-muted text-xs">Total services</div>
+                  <div className="font-semibold text-slate-900">
+                    {formatINR(
+                      incentiveMonths.reduce((s, m) => s + m.serviceAmount, 0)
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted text-xs">Total incentive</div>
+                  <div className="font-bold text-brand-600">
+                    {formatINR(
+                      incentiveMonths.reduce((s, m) => s + m.commission, 0)
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* month-wise sections */}
+              {incentiveMonths.map((m) => (
+                <div
+                  key={m.key}
+                  className="overflow-hidden rounded-xl border border-line"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-2.5">
+                    <span className="font-semibold text-slate-900">
+                      {m.label}
+                    </span>
+                    <span className="flex flex-wrap items-center gap-3 text-xs">
+                      <span className="text-muted">
+                        {m.bills.length} bill{m.bills.length !== 1 ? "s" : ""}
+                      </span>
+                      <span className="text-muted">
+                        Services: {formatINR(m.serviceAmount)}
+                      </span>
+                      <Badge tone="brand">
+                        Incentive: {formatINR(m.commission)}
+                      </Badge>
+                    </span>
+                  </div>
+                  <Table>
+                    <THead>
+                      <TR>
+                        <TH>Bill #</TH>
+                        <TH>Date</TH>
+                        <TH>Customer</TH>
+                        <TH>Services</TH>
+                        <TH className="text-right">Service Amt</TH>
+                      </TR>
+                    </THead>
+                    <TBody>
+                      {m.bills.map((ib) => (
+                        <TR key={ib.bill.id}>
+                          <TD className="font-mono text-xs text-brand-600">
+                            {ib.bill.billNumber}
+                          </TD>
+                          <TD className="whitespace-nowrap text-xs text-muted">
+                            {format(ib.bill.createdAt, "dd MMM, HH:mm")}
+                          </TD>
+                          <TD className="text-sm">{ib.bill.customerName}</TD>
+                          <TD className="text-xs text-muted">
+                            {ib.services.map((s) => s.serviceName).join(", ")}
+                          </TD>
+                          <TD className="text-right font-medium">
+                            {formatINR(ib.serviceAmount)}
+                          </TD>
+                        </TR>
+                      ))}
+                    </TBody>
+                  </Table>
+                </div>
+              ))}
+            </div>
+          ))}
+      </Dialog>
     </div>
   );
 }

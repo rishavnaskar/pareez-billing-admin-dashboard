@@ -230,6 +230,10 @@ function mapEmployee(id: string, data: DocumentData): Employee {
     designation: data.designation,
     branchId: data.branchId,
     joinedAt: data.joinedAt,
+    commissionPercent:
+      typeof data.commissionPercent === "number"
+        ? data.commissionPercent
+        : undefined,
     active: data.active !== false,
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
