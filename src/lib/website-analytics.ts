@@ -42,6 +42,11 @@ export interface WebKpis {
   /** sessions that produced a WhatsApp click, call or booking request */
   convertedSessions: number;
   conversionRate: number; // convertedSessions / sessions
+  /** sessions that started filling the booking form (typed name/phone) */
+  formStarts: number;
+  /** sessions that started the form but never tapped "Book Appointment" */
+  abandonedForms: number;
+  abandonmentRate: number; // abandonedForms / formStarts
 }
 
 const CONTACT_TYPES = new Set(["whatsapp_click", "call_click", "booking_submitted"]);
@@ -56,6 +61,18 @@ export function computeWebKpis(events: WebEvent[], bookingsInRange: number): Web
       .filter((e) => CONTACT_TYPES.has(e.type) && sessionIds.has(e.sessionId))
       .map((e) => e.sessionId)
   ).size;
+  // Form abandonment: sessions that started filling the booking form but never
+  // submitted it. Compares "booking_started" against "booking_submitted".
+  const startedSessions = new Set(
+    events.filter((e) => e.type === "booking_started").map((e) => e.sessionId)
+  );
+  const submittedSessions = new Set(
+    events.filter((e) => e.type === "booking_submitted").map((e) => e.sessionId)
+  );
+  const formStarts = startedSessions.size;
+  const abandonedForms = [...startedSessions].filter(
+    (id) => !submittedSessions.has(id)
+  ).length;
   return {
     pageViews: views.length,
     visitors: new Set(views.map((e) => e.visitorId)).size,
@@ -69,6 +86,9 @@ export function computeWebKpis(events: WebEvent[], bookingsInRange: number): Web
     bookingRequests: bookingsInRange,
     convertedSessions,
     conversionRate: sessions > 0 ? convertedSessions / sessions : 0,
+    formStarts,
+    abandonedForms,
+    abandonmentRate: formStarts > 0 ? abandonedForms / formStarts : 0,
   };
 }
 
@@ -169,6 +189,9 @@ export function bookingFunnel(events: WebEvent[]): FunnelStep[] {
       .filter((e) => e.type === "pageview" && e.path === "/book")
       .map((e) => e.sessionId)
   ).size;
+  const startedForm = new Set(
+    events.filter((e) => e.type === "booking_started").map((e) => e.sessionId)
+  ).size;
   const contacted = new Set(
     events
       .filter((e) => e.type === "whatsapp_click" || e.type === "call_click")
@@ -181,6 +204,7 @@ export function bookingFunnel(events: WebEvent[]): FunnelStep[] {
   return [
     { label: "Visited the website", count: sessions, pctOfFirst: 1 },
     { label: "Opened the booking page", count: bookPage, pctOfFirst: pct(bookPage) },
+    { label: "Started filling the form", count: startedForm, pctOfFirst: pct(startedForm) },
     { label: "Tapped WhatsApp / Call", count: contacted, pctOfFirst: pct(contacted) },
     { label: "Sent a booking request", count: booked, pctOfFirst: pct(booked) },
   ];

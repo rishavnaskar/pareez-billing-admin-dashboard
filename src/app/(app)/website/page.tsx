@@ -10,6 +10,7 @@ import {
   Phone,
   RefreshCw,
   Users,
+  UserX,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -232,8 +233,19 @@ export default function WebsitePage() {
             />
           </div>
 
-          {/* Secondary KPI strip — contact actions */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Secondary KPI strip — contact actions + form drop-off */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              label="Form Started, Not Booked"
+              value={formatNumber(kpis.abandonedForms)}
+              icon={<UserX className="h-5 w-5" />}
+              hint={
+                kpis.formStarts > 0
+                  ? `${formatPercent(kpis.abandonmentRate)} of ${formatNumber(kpis.formStarts)} who started filling`
+                  : "Filled the form but didn't tap Book"
+              }
+              tone="amber"
+            />
             <StatCard
               label="WhatsApp Clicks"
               value={formatNumber(kpis.whatsappClicks)}
@@ -251,7 +263,7 @@ export default function WebsitePage() {
               value={formatNumber(kpis.directionsClicks)}
               icon={<Globe className="h-5 w-5" />}
               hint={`${formatNumber(kpis.socialClicks)} Instagram/Facebook taps`}
-              tone="amber"
+              tone="purple"
             />
           </div>
 

@@ -175,6 +175,7 @@ export type WebEventType =
   | "directions_click"
   | "instagram_click"
   | "facebook_click"
+  | "booking_started"
   | "booking_submitted";
 
 /** webEvents/{eventId} — one anonymous interaction on the website. */
