@@ -26,7 +26,7 @@ import { StatCard } from "@/components/StatCard";
 import { billsInRange, type RangeKey } from "@/lib/analytics";
 import { formatINR } from "@/lib/currency";
 import { exportToExcel, exportToPDF, billColumns } from "@/lib/export";
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { buildWhatsAppLink, billPublicUrl, generateBillShareMessage } from "@/lib/whatsapp";
 import type { Bill, PaymentMethod } from "@/lib/types";
 
 // ── range label helper ────────────────────────────────────────────────────────
@@ -61,11 +61,10 @@ function BillDetailDialog({
     (s, svc) => s + (svc.price - svc.discountAmount),
     0
   );
-  const summary =
-    `Bill ${bill.billNumber} — ${formatINR(bill.netPayableAmount || bill.totalAmount)} — ` +
-    `${bill.services.map((s) => s.serviceName).join(", ")} — ` +
-    `${format(bill.createdAt, "dd MMM yyyy")} — Pareez Unisex Professional Salon`;
-  const waLink = buildWhatsAppLink(bill.customerPhone, summary);
+  // Same WhatsApp intent as the billing app's share: only the bill link
+  // (no bill number / amount / services), plus header, thanks and socials.
+  const message = generateBillShareMessage(billPublicUrl(bill.id));
+  const waLink = buildWhatsAppLink(bill.customerPhone, message);
 
   return (
     <Dialog

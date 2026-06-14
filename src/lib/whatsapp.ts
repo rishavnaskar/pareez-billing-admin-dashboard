@@ -3,6 +3,33 @@
 
 const SALON_NAME = "Pareez Unisex Professional Salon";
 
+// Public URL of the billing app, which serves the shareable /bill/<id> pages.
+// Override via NEXT_PUBLIC_BILLING_URL if the billing app moves domains.
+const BILLING_APP_URL = (
+  process.env.NEXT_PUBLIC_BILLING_URL || "https://pareez-billing.vercel.app"
+).replace(/\/$/, "");
+
+/** Public link to a bill, served by the billing app. */
+export function billPublicUrl(billId: string): string {
+  return `${BILLING_APP_URL}/bill/${billId}`;
+}
+
+/**
+ * Bill-share message — kept identical to the billing app's
+ * generateWhatsAppMessage(): only the bill link, plus header, thanks, socials.
+ */
+export function generateBillShareMessage(billUrl: string): string {
+  return `Bill from Pareez Unisex Professional Salon
+
+View your bill online: ${billUrl}
+
+Thank you for visiting Pareez!
+
+Follow us on social media:
+Instagram: @pareezsalon
+Facebook: PAREEZ.salon`;
+}
+
 export function normalizePhone(phone?: string): string | null {
   if (!phone) return null;
   let clean = phone.replace(/\D/g, "");
