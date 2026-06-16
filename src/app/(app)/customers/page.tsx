@@ -104,7 +104,7 @@ function CustomerDrawer({
       size="xl"
       title={
         <span className="flex items-center gap-2 flex-wrap">
-          <span className="text-slate-900">{customer.name}</span>
+          <span className="text-slate-900 dark:text-slate-100">{customer.name}</span>
           <TierBadge tier={w.tier} />
         </span>
       }
@@ -131,21 +131,21 @@ function CustomerDrawer({
     >
       {/* wallet summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-5">
-        <div className="rounded-xl bg-brand-50 p-3 text-center">
+        <div className="rounded-xl bg-brand-50 dark:bg-brand-500/10 p-3 text-center">
           <p className="text-xs text-muted mb-1">Balance</p>
-          <p className="text-lg font-bold text-brand-700">{formatINR(w.balance)}</p>
+          <p className="text-lg font-bold text-brand-700 dark:text-brand-300">{formatINR(w.balance)}</p>
         </div>
-        <div className="rounded-xl bg-slate-50 p-3 text-center">
+        <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-center">
           <p className="text-xs text-muted mb-1">Lifetime Spend</p>
-          <p className="text-lg font-bold text-slate-800">{formatINR(w.lifetimeSpend)}</p>
+          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{formatINR(w.lifetimeSpend)}</p>
         </div>
-        <div className="rounded-xl bg-emerald-50 p-3 text-center">
+        <div className="rounded-xl bg-emerald-50 dark:bg-emerald-500/10 p-3 text-center">
           <p className="text-xs text-muted mb-1">Earned</p>
-          <p className="text-lg font-bold text-emerald-700">{formatINR(w.lifetimeEarned)}</p>
+          <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">{formatINR(w.lifetimeEarned)}</p>
         </div>
-        <div className="rounded-xl bg-amber-50 p-3 text-center">
+        <div className="rounded-xl bg-amber-50 dark:bg-amber-500/10 p-3 text-center">
           <p className="text-xs text-muted mb-1">Redeemed</p>
-          <p className="text-lg font-bold text-amber-700">{formatINR(w.lifetimeRedeemed)}</p>
+          <p className="text-lg font-bold text-amber-700 dark:text-amber-300">{formatINR(w.lifetimeRedeemed)}</p>
         </div>
       </div>
 
@@ -210,7 +210,7 @@ function CustomerDrawer({
                       {b.paymentMethod}
                     </Badge>
                   </TD>
-                  <TD className="text-emerald-600">
+                  <TD className="text-emerald-600 dark:text-emerald-400">
                     {b.cashbackEarned > 0 ? `+${formatINR(b.cashbackEarned)}` : "—"}
                   </TD>
                 </TR>
@@ -245,10 +245,10 @@ function CustomerDrawer({
                   <TD
                     className={
                       isCredit
-                        ? "font-semibold text-emerald-600"
+                        ? "font-semibold text-emerald-600 dark:text-emerald-400"
                         : isDebit
-                        ? "font-semibold text-red-600"
-                        : "font-semibold text-amber-600"
+                        ? "font-semibold text-red-600 dark:text-red-400"
+                        : "font-semibold text-amber-600 dark:text-amber-400"
                     }
                   >
                     {isCredit ? "+" : isDebit ? "-" : ""}
@@ -480,7 +480,7 @@ export default function CustomersPage() {
                 {filtered.map((c) => (
                   <TR key={c.id} className="cursor-pointer">
                     <TD
-                      className="font-medium text-slate-900 hover:text-brand-600"
+                      className="font-medium text-slate-900 dark:text-slate-100 hover:text-brand-600"
                       onClick={() => setSelectedCustomer(c)}
                     >
                       {c.name}
@@ -489,7 +489,7 @@ export default function CustomersPage() {
                     <TD>
                       <TierBadge tier={c.wallet.tier} />
                     </TD>
-                    <TD className="font-semibold text-brand-700">
+                    <TD className="font-semibold text-brand-700 dark:text-brand-300">
                       {formatINR(c.wallet.balance)}
                     </TD>
                     <TD>{formatINR(c.wallet.lifetimeSpend)}</TD>

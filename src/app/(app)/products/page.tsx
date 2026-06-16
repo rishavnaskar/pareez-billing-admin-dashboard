@@ -332,7 +332,7 @@ export default function ProductsPage() {
             <div className="flex-1 min-w-[180px]">
               <Label>Search</Label>
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <Input
                   className="pl-8"
                   placeholder="Name, SKU, or category…"
@@ -456,7 +456,7 @@ export default function ProductsPage() {
                   <TR key={p.id}>
                     <TD>
                       <div>
-                        <p className="font-medium text-slate-900">{p.name}</p>
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{p.name}</p>
                         {p.description && (
                           <p className="text-xs text-muted truncate max-w-[220px]">{p.description}</p>
                         )}
@@ -472,7 +472,7 @@ export default function ProductsPage() {
                     <TD>
                       <Badge tone={categoryTone(p.category)}>{p.category}</Badge>
                     </TD>
-                    <TD className="font-semibold text-slate-900">{formatINR(p.price)}</TD>
+                    <TD className="font-semibold text-slate-900 dark:text-slate-100">{formatINR(p.price)}</TD>
                     <TD className="text-muted text-sm">
                       {p.durationMinutes ? `${p.durationMinutes} min` : "—"}
                     </TD>
@@ -632,11 +632,11 @@ export default function ProductsPage() {
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-brand-600 focus:ring-brand-500"
                   checked={form.active}
                   onChange={(e) => setField("active", e.target.checked)}
                 />
-                <span className="text-sm font-medium text-slate-700">Active</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Active</span>
                 <span className="text-xs text-muted">(visible in billing app suggestions)</span>
               </label>
             </div>
@@ -662,7 +662,7 @@ export default function ProductsPage() {
           </>
         }
       >
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           <p>
             <span className="font-semibold">{deleteTarget?.name}</span> will be permanently removed
             from the catalog.

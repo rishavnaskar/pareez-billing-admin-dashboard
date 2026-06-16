@@ -440,7 +440,7 @@ export default function EmployeesPage() {
             <div className="flex-1 min-w-[180px]">
               <Label>Search</Label>
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <Input
                   className="pl-8"
                   placeholder="Name, phone, designation…"
@@ -576,7 +576,7 @@ export default function EmployeesPage() {
                   const thisMonth = months.find((m) => m.key === currentMonthKey);
                   return (
                     <TR key={e.id}>
-                      <TD className="font-medium text-slate-900">{e.name}</TD>
+                      <TD className="font-medium text-slate-900 dark:text-slate-100">{e.name}</TD>
                       <TD>
                         {e.designation ? (
                           <Badge tone="blue">{e.designation}</Badge>
@@ -609,7 +609,7 @@ export default function EmployeesPage() {
                             {e.dateOfBirth ? (
                               <span className="flex items-center gap-1">
                                 <Cake className="h-3.5 w-3.5 text-brand-500" />
-                                <span className="text-slate-700">
+                                <span className="text-slate-700 dark:text-slate-200">
                                   {format(new Date(e.dateOfBirth + "T00:00:00"), "dd MMM")}
                                 </span>
                                 {age !== null && (
@@ -816,11 +816,11 @@ export default function EmployeesPage() {
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-brand-600 focus:ring-brand-500"
                   checked={form.active}
                   onChange={(e) => setField("active", e.target.checked)}
                 />
-                <span className="text-sm font-medium text-slate-700">Active</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Active</span>
                 <span className="text-xs text-muted">(currently employed)</span>
               </label>
             </div>
@@ -846,7 +846,7 @@ export default function EmployeesPage() {
           </>
         }
       >
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           <p>
             <span className="font-semibold">{deleteTarget?.name}</span> will be permanently removed
             from the staff directory.
@@ -907,17 +907,17 @@ export default function EmployeesPage() {
           ) : (
             <div className="space-y-4">
               {(incentiveTarget.commissionPercent ?? 0) === 0 && (
-                <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
                   Set a commission % for this employee to turn the service totals
                   below into a payable incentive.
                 </div>
               )}
 
               {/* all-time totals */}
-              <div className="flex flex-wrap gap-6 rounded-xl border border-line bg-slate-50 px-4 py-3 text-sm">
+              <div className="flex flex-wrap gap-6 rounded-xl border border-line bg-slate-50 dark:bg-slate-800/60 px-4 py-3 text-sm">
                 <div>
                   <div className="text-muted text-xs">Total services</div>
-                  <div className="font-semibold text-slate-900">
+                  <div className="font-semibold text-slate-900 dark:text-slate-100">
                     {formatINR(
                       incentiveMonths.reduce((s, m) => s + m.serviceAmount, 0)
                     )}
@@ -939,8 +939,8 @@ export default function EmployeesPage() {
                   key={m.key}
                   className="overflow-hidden rounded-xl border border-line"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-2.5">
-                    <span className="font-semibold text-slate-900">
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/60 px-4 py-2.5">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
                       {m.label}
                     </span>
                     <span className="flex flex-wrap items-center gap-3 text-xs">

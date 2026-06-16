@@ -18,7 +18,7 @@ export function TBody({ className, ...props }: HTMLAttributes<HTMLTableSectionEl
 }
 
 export function TR({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("hover:bg-slate-50/70 transition-colors", className)} {...props} />;
+  return <tr className={cn("hover:bg-slate-50/70 dark:hover:bg-slate-800/60 transition-colors", className)} {...props} />;
 }
 
 export function TH({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
@@ -34,5 +34,5 @@ export function TH({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 }
 
 export function TD({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-3 py-2.5 align-middle text-slate-700", className)} {...props} />;
+  return <td className={cn("px-3 py-2.5 align-middle text-slate-700 dark:text-slate-200", className)} {...props} />;
 }

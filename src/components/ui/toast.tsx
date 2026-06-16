@@ -42,13 +42,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             className={cn(
-              "flex items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 card-shadow animate-fade-in",
+              "flex items-center gap-3 rounded-xl border border-line bg-white dark:bg-slate-800 px-4 py-3 card-shadow animate-fade-in",
               "min-w-[260px] max-w-sm"
             )}
           >
             {icons[t.tone]}
-            <span className="flex-1 text-sm text-slate-700">{t.message}</span>
-            <button onClick={() => dismiss(t.id)} className="text-slate-400 hover:text-slate-600">
+            <span className="flex-1 text-sm text-slate-700 dark:text-slate-200">{t.message}</span>
+            <button onClick={() => dismiss(t.id)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
               <X className="h-4 w-4" />
             </button>
           </div>

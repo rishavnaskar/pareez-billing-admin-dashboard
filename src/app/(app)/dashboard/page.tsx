@@ -124,7 +124,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Overview</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Overview</h1>
           <p className="mt-0.5 text-sm text-muted">Your salon performance at a glance</p>
         </div>
         <SegmentedControl
@@ -245,7 +245,7 @@ export default function DashboardPage() {
             </CardTitle>
             <Link
               href="/birthdays"
-              className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
+              className="flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
             >
               View all <ArrowRight className="h-3 w-3" />
             </Link>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                 {todayBirthdays.map((c) => (
                   <li key={c.id} className="flex items-center justify-between py-2.5">
                     <div>
-                      <p className="text-sm font-medium text-slate-800">{c.name}</p>
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{c.name}</p>
                       {c.phone && (
                         <p className="text-xs text-muted">{c.phone}</p>
                       )}
@@ -282,7 +282,7 @@ export default function DashboardPage() {
           <CardTitle>Top Customers</CardTitle>
           <Link
             href="/customers"
-            className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
           >
             View all <ArrowRight className="h-3 w-3" />
           </Link>
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                     <TD>
                       <Link
                         href="/customers"
-                        className="font-medium text-slate-800 hover:text-brand-600 hover:underline"
+                        className="font-medium text-slate-800 dark:text-slate-100 hover:text-brand-600 hover:underline"
                       >
                         {c.name}
                       </Link>
@@ -337,7 +337,7 @@ export default function DashboardPage() {
           <CardTitle>Recent Bills</CardTitle>
           <Link
             href="/bills"
-            className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
           >
             View all <ArrowRight className="h-3 w-3" />
           </Link>
@@ -365,11 +365,11 @@ export default function DashboardPage() {
               <TBody>
                 {recentBills.map((bill) => (
                   <TR key={bill.id}>
-                    <TD className="pl-6 font-mono text-xs font-medium text-slate-600">
+                    <TD className="pl-6 font-mono text-xs font-medium text-slate-600 dark:text-slate-300">
                       {bill.billNumber}
                     </TD>
                     <TD>
-                      <p className="font-medium text-slate-800">{bill.customerName}</p>
+                      <p className="font-medium text-slate-800 dark:text-slate-100">{bill.customerName}</p>
                       {bill.customerPhone && (
                         <p className="text-xs text-muted">{bill.customerPhone}</p>
                       )}
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                         {bill.paymentMethod.toUpperCase()}
                       </Badge>
                     </TD>
-                    <TD className="text-right font-semibold text-slate-800">
+                    <TD className="text-right font-semibold text-slate-800 dark:text-slate-100">
                       {formatINR(bill.netPayableAmount || bill.totalAmount)}
                     </TD>
                     <TD className="text-right pr-6 text-muted text-xs">

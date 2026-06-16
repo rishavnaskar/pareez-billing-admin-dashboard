@@ -116,7 +116,7 @@ export function MessageDialog({
           <p className="mt-1 text-xs text-muted">{text.length} characters</p>
         </div>
         {!hasPhone && (
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             This contact has no phone number. WhatsApp will open with the message pre-filled so you
             can pick a recipient manually.

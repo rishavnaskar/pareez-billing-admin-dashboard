@@ -165,14 +165,14 @@ export default function BirthdaysPage() {
     <div className="space-y-6 animate-fade-in">
       {/* Hero / Today section */}
       <Card className="overflow-hidden">
-        <div className="bg-gradient-to-br from-brand-50 via-pink-50 to-purple-50 p-6">
+        <div className="bg-gradient-to-br from-brand-50 via-pink-50 to-purple-50 dark:from-brand-500/15 dark:via-pink-500/10 dark:to-purple-500/15 p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-4xl shadow-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-4xl shadow-sm">
                 🎂
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Birthday Center</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Birthday Center</h1>
                 <p className="text-sm text-muted">
                   {hasToday
                     ? `🎉 ${todayPeople.length} birthday${todayPeople.length > 1 ? "s" : ""} today — send some love!`
@@ -220,7 +220,7 @@ export default function BirthdaysPage() {
                 return (
                   <div
                     key={p.id}
-                    className="flex items-center gap-3 rounded-xl bg-white/80 px-4 py-3 shadow-sm"
+                    className="flex items-center gap-3 rounded-xl bg-white/80 dark:bg-slate-800 px-4 py-3 shadow-sm"
                   >
                     {/* Avatar */}
                     <div
@@ -231,7 +231,7 @@ export default function BirthdaysPage() {
                       {getInitials(p.name)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-slate-900">{p.name}</p>
+                      <p className="truncate font-semibold text-slate-900 dark:text-slate-100">{p.name}</p>
                       <p className="text-xs text-muted">
                         {age !== null ? `Turning ${age}` : formatDob(p.dateOfBirth)}
                       </p>
@@ -278,7 +278,7 @@ export default function BirthdaysPage() {
         <CardContent className="pt-5">
           <div className="flex flex-wrap items-end gap-4">
             <div>
-              <p className="mb-1.5 text-sm font-medium text-slate-700">Scope</p>
+              <p className="mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-200">Scope</p>
               <SegmentedControl<ScopeFilter>
                 options={[
                   { value: "today", label: "Today" },
@@ -359,7 +359,7 @@ export default function BirthdaysPage() {
                           >
                             {getInitials(p.name)}
                           </div>
-                          <span className="font-medium text-slate-900">{p.name}</span>
+                          <span className="font-medium text-slate-900 dark:text-slate-100">{p.name}</span>
                         </div>
                       </TD>
                       <TD>

@@ -71,13 +71,13 @@ function Funnel({ steps }: { steps: { label: string; count: number; pctOfFirst: 
       {steps.map((s, i) => (
         <div key={s.label}>
           <div className="mb-1 flex items-baseline justify-between text-sm">
-            <span className="font-medium text-slate-700">{s.label}</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{s.label}</span>
             <span className="text-muted">
-              <span className="font-semibold text-slate-900">{formatNumber(s.count)}</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{formatNumber(s.count)}</span>
               {i > 0 && <span className="ml-2 text-xs">{formatPercent(s.pctOfFirst)}</span>}
             </span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div
               className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all"
               style={{ width: `${Math.max(s.pctOfFirst * 100, s.count > 0 ? 2 : 0)}%` }}
@@ -159,7 +159,7 @@ export default function WebsitePage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
             Website
             {newCount > 0 && <Badge tone="blue">{newCount} new request{newCount > 1 ? "s" : ""}</Badge>}
           </h1>
@@ -179,7 +179,7 @@ export default function WebsitePage() {
           <SegmentedControl options={RANGE_OPTIONS} value={range} onChange={setRange} />
           <button
             onClick={() => void load(range)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white text-slate-600 transition-colors hover:bg-slate-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             title="Refresh"
           >
             {isLoading ? <Spinner className="h-4 w-4" /> : <RefreshCw className="h-4 w-4" />}
@@ -188,7 +188,7 @@ export default function WebsitePage() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -429,7 +429,7 @@ export default function WebsitePage() {
                       {formatDistanceToNow(b.createdAt, { addSuffix: true })}
                     </TD>
                     <TD>
-                      <div className="font-medium text-slate-900">{b.name}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-100">{b.name}</div>
                       <div className="text-xs text-muted">{b.phone}</div>
                     </TD>
                     <TD className="whitespace-nowrap">{b.branchName}</TD>
@@ -447,7 +447,7 @@ export default function WebsitePage() {
                           value={b.status}
                           disabled={savingId === b.id}
                           onChange={(e) => void setStatus(b.id, e.target.value as WebBookingStatus)}
-                          className="rounded-md border border-line bg-white px-1.5 py-1 text-xs text-slate-600"
+                          className="rounded-md border border-line bg-white dark:bg-slate-800 px-1.5 py-1 text-xs text-slate-600 dark:text-slate-300"
                         >
                           {(Object.keys(STATUS_META) as WebBookingStatus[]).map((s) => (
                             <option key={s} value={s}>
@@ -462,7 +462,7 @@ export default function WebsitePage() {
                         href={waReplyLink(b)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />
                         Reply

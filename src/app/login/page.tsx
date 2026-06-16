@@ -45,19 +45,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-purple-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-600 text-white card-shadow">
             <Scissors className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Pareez Admin</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Pareez Admin</h1>
           <p className="mt-1 text-sm text-muted">Owner dashboard · sign in to continue</p>
         </div>
 
         <form
           onSubmit={onSubmit}
-          className="rounded-2xl border border-line bg-white p-6 card-shadow"
+          className="rounded-2xl border border-line bg-white dark:bg-slate-800 p-6 card-shadow"
         >
           <div className="mb-4">
             <Label htmlFor="email">Email</Label>
@@ -85,7 +85,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
+            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">{error}</div>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={busy}>

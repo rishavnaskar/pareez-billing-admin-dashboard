@@ -189,7 +189,7 @@ export default function SettingsPage() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
           <Settings className="h-6 w-6 text-brand-600" />
           Settings
         </h1>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label>Email</Label>
-              <div className="flex h-10 items-center rounded-lg border border-line bg-slate-50 px-3 text-sm text-slate-600 select-all">
+              <div className="flex h-10 items-center rounded-lg border border-line bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-600 dark:text-slate-300 select-all">
                 {user?.email ?? "—"}
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <div className="rounded-xl border border-blue-100 bg-blue-50 dark:bg-blue-500/10 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
             <Info className="mb-0.5 mr-1.5 inline-block h-4 w-4" />
             This dashboard reads and writes to the live Firestore database used by the{" "}
             <span className="font-semibold">pareez-billing</span> app. Changes take effect
@@ -274,9 +274,9 @@ export default function SettingsPage() {
           ) : (
             <>
               {/* Tier thresholds */}
-              <div className="space-y-4 rounded-xl border border-line bg-slate-50/60 p-4">
+              <div className="space-y-4 rounded-xl border border-line bg-slate-50/60 dark:bg-slate-800/60 p-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-800">Membership Tier Thresholds</h3>
+                  <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Membership Tier Thresholds</h3>
                   <p className="mt-0.5 text-xs text-muted">
                     Lifetime spend (₹) required to reach each tier.
                   </p>
@@ -323,9 +323,9 @@ export default function SettingsPage() {
               </div>
 
               {/* Cashback basics */}
-              <div className="space-y-4 rounded-xl border border-line bg-slate-50/60 p-4">
+              <div className="space-y-4 rounded-xl border border-line bg-slate-50/60 dark:bg-slate-800/60 p-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-800">Cashback Basics</h3>
+                  <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Cashback Basics</h3>
                   <p className="mt-0.5 text-xs text-muted">
                     Welcome bonus and minimum bill required to earn cashback.
                   </p>
@@ -381,9 +381,9 @@ export default function SettingsPage() {
               </div>
 
               {/* Read-only: eligible payment methods + dayConfig */}
-              <div className="space-y-3 rounded-xl border border-line bg-slate-50/60 p-4">
+              <div className="space-y-3 rounded-xl border border-line bg-slate-50/60 dark:bg-slate-800/60 p-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                     Eligible Payment Methods for Discount
                   </h3>
                   <p className="mt-0.5 text-xs text-muted">
@@ -406,7 +406,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted">
                   <Coins className="mr-1 inline-block h-3.5 w-3.5" />
                   Day/tier cashback rate matrix:{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 dark:text-slate-200">
                     {dayConfigPresent ? "Configured" : "Not configured"}
                   </span>{" "}
                   — edit in the billing app.
@@ -463,9 +463,9 @@ export default function SettingsPage() {
           </div>
 
           {/* Step-by-step instructions */}
-          <div className="rounded-xl border border-line bg-slate-50 p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-800">How to set up</h3>
-            <ol className="space-y-2 text-sm text-slate-700 list-decimal list-inside">
+          <div className="rounded-xl border border-line bg-slate-50 dark:bg-slate-800/60 p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">How to set up</h3>
+            <ol className="space-y-2 text-sm text-slate-700 dark:text-slate-200 list-decimal list-inside">
               <li>
                 Open your Google Sheet, then go to{" "}
                 <span className="font-medium">Extensions → Apps Script</span>.
@@ -483,7 +483,7 @@ export default function SettingsPage() {
               </li>
               <li>
                 Click <span className="font-medium">Deploy</span>, copy the{" "}
-                <span className="font-mono text-xs bg-slate-200 px-1 rounded">/exec</span> URL, and
+                <span className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 rounded">/exec</span> URL, and
                 paste it above.
               </li>
             </ol>
@@ -513,27 +513,27 @@ export default function SettingsPage() {
             <CardTitle>About</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-slate-600">
+        <CardContent className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-800">Pareez Billing Admin Dashboard</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Pareez Billing Admin Dashboard</span>
             <Badge tone="brand">v1.0</Badge>
           </div>
           <p>
             A real-time admin dashboard for{" "}
-            <span className="font-medium text-slate-800">Pareez Unisex Professional Salon</span>.
+            <span className="font-medium text-slate-800 dark:text-slate-100">Pareez Unisex Professional Salon</span>.
             It reads live data from the same Firestore project as the billing app, giving owners full
             visibility into revenue, customers, and operations.
           </p>
-          <ul className="list-disc list-inside space-y-1 text-slate-600">
+          <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300">
             <li>Analytics, revenue trends, and KPI tracking</li>
             <li>Customer management with wallet and tier details</li>
             <li>Bills history with search and filtering</li>
             <li>
-              <span className="font-medium text-slate-800">Products catalog</span> — a new
+              <span className="font-medium text-slate-800 dark:text-slate-100">Products catalog</span> — a new
               collection managed exclusively by this dashboard
             </li>
             <li>
-              <span className="font-medium text-slate-800">Employees directory</span> — another new
+              <span className="font-medium text-slate-800 dark:text-slate-100">Employees directory</span> — another new
               collection managed exclusively by this dashboard
             </li>
             <li>Data export to Excel, PDF, and Google Sheets</li>

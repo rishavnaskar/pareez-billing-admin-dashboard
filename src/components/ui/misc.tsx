@@ -33,9 +33,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-white/60 px-6 py-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-white/60 dark:bg-slate-800/60 px-6 py-16 text-center">
       {icon && <div className="mb-1 text-slate-300">{icon}</div>}
-      <h3 className="text-base font-semibold text-slate-700">{title}</h3>
+      <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
       {description && <p className="max-w-sm text-sm text-muted">{description}</p>}
       {action && <div className="mt-3">{action}</div>}
     </div>
@@ -54,14 +54,14 @@ export function SegmentedControl<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn("inline-flex rounded-lg border border-line bg-white p-0.5", className)}>
+    <div className={cn("inline-flex rounded-lg border border-line bg-white dark:bg-slate-800 p-0.5", className)}>
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
           className={cn(
             "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-            value === o.value ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+            value === o.value ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
           )}
         >
           {o.label}

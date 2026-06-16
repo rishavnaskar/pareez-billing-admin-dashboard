@@ -345,7 +345,7 @@ export default function ExportsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Data Export Center</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Data Export Center</h1>
           <p className="mt-0.5 text-sm text-muted">
             {RANGE_LABEL[range]} · {rangeSubtitle(range)}
           </p>
@@ -357,7 +357,7 @@ export default function ExportsPage() {
       {isLoading && bills.length === 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-100" />
+            <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
           ))}
         </div>
       ) : (
@@ -507,7 +507,7 @@ export default function ExportsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {!sheetUrl ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
               No Google Sheet connected yet.{" "}
               <a href="/settings" className="font-semibold underline hover:text-amber-900">
                 Go to Settings

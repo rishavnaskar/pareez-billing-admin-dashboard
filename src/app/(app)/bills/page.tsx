@@ -100,7 +100,7 @@ function BillDetailDialog({
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-5">
         <div>
           <span className="text-muted">Customer</span>
-          <p className="font-medium text-slate-900">{bill.customerName}</p>
+          <p className="font-medium text-slate-900 dark:text-slate-100">{bill.customerName}</p>
           {bill.customerPhone && (
             <p className="text-xs text-muted">{bill.customerPhone}</p>
           )}
@@ -115,7 +115,7 @@ function BillDetailDialog({
         </div>
         <div>
           <span className="text-muted">Branch</span>
-          <p className="font-medium text-slate-900">{bill.branchName}</p>
+          <p className="font-medium text-slate-900 dark:text-slate-100">{bill.branchName}</p>
         </div>
         <div>
           <span className="text-muted">Tier at Purchase</span>
@@ -165,7 +165,7 @@ function BillDetailDialog({
           <span>{formatINR(bill.subtotal)}</span>
         </div>
         {bill.discountAmount > 0 && (
-          <div className="flex justify-between text-red-600">
+          <div className="flex justify-between text-red-600 dark:text-red-400">
             <span>Discount</span>
             <span>- {formatINR(bill.discountAmount)}</span>
           </div>
@@ -175,7 +175,7 @@ function BillDetailDialog({
           <span>{formatINR(bill.totalAmount)}</span>
         </div>
         {bill.walletAmountUsed > 0 && (
-          <div className="flex justify-between text-brand-600">
+          <div className="flex justify-between text-brand-600 dark:text-brand-400">
             <span>Wallet Used</span>
             <span>- {formatINR(bill.walletAmountUsed)}</span>
           </div>
@@ -185,7 +185,7 @@ function BillDetailDialog({
           <span>{formatINR(bill.netPayableAmount || bill.totalAmount)}</span>
         </div>
         {bill.cashbackEarned > 0 && (
-          <div className="flex justify-between text-emerald-600 text-xs">
+          <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-xs">
             <span>Cashback Earned</span>
             <span>+ {formatINR(bill.cashbackEarned)}</span>
           </div>
@@ -457,14 +457,14 @@ export default function BillsPage() {
               <TBody>
                 {dayGroups.map((group) => (
                   <Fragment key={group.day}>
-                    <TR className="bg-slate-50 hover:bg-slate-50">
+                    <TR className="bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/60">
                       <TD colSpan={11} className="py-2">
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <span className="text-sm font-semibold text-slate-900">
+                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                             {group.day}
                           </span>
-                          <span className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
-                            <span className="font-medium text-slate-800">
+                          <span className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300">
+                            <span className="font-medium text-slate-800 dark:text-slate-100">
                               Total: {formatINR(group.totals.overall)}
                             </span>
                             <span>Cash: {formatINR(group.totals.cash)}</span>
@@ -488,13 +488,13 @@ export default function BillsPage() {
                           className="cursor-pointer"
                           onClick={() => setSelectedBill(b)}
                         >
-                          <TD className="font-mono text-xs text-brand-600">
+                          <TD className="font-mono text-xs text-brand-600 dark:text-brand-400">
                             {b.billNumber}
                           </TD>
                           <TD className="whitespace-nowrap text-xs text-muted">
                             {format(b.createdAt, "dd MMM yyyy HH:mm")}
                           </TD>
-                          <TD className="font-medium text-slate-900 max-w-[140px] truncate">
+                          <TD className="font-medium text-slate-900 dark:text-slate-100 max-w-[140px] truncate">
                             {b.customerName}
                           </TD>
                           <TD className="text-xs text-muted max-w-[100px] truncate">
@@ -506,15 +506,15 @@ export default function BillsPage() {
                           <TD className="text-right font-semibold">
                             {formatINR(b.totalAmount)}
                           </TD>
-                          <TD className="text-right text-brand-600 text-xs">
+                          <TD className="text-right text-brand-600 dark:text-brand-400 text-xs">
                             {b.walletAmountUsed > 0
                               ? `- ${formatINR(b.walletAmountUsed)}`
                               : "—"}
                           </TD>
-                          <TD className="text-right font-bold text-slate-900">
+                          <TD className="text-right font-bold text-slate-900 dark:text-slate-100">
                             {formatINR(b.netPayableAmount || b.totalAmount)}
                           </TD>
-                          <TD className="text-right text-emerald-600 text-xs">
+                          <TD className="text-right text-emerald-600 dark:text-emerald-400 text-xs">
                             {b.cashbackEarned > 0
                               ? `+ ${formatINR(b.cashbackEarned)}`
                               : "—"}

@@ -200,13 +200,13 @@ export default function MessagingPage() {
           <MessageCircle className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Messaging Center</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Messaging Center</h1>
           <p className="text-sm text-muted">Compose WhatsApp campaigns to customer segments</p>
         </div>
       </div>
 
       {/* WhatsApp broadcast notice */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         <div>
           <span className="font-semibold">One chat at a time:</span> WhatsApp opens one conversation
@@ -233,8 +233,8 @@ export default function MessagingPage() {
                   onClick={() => setSelectedTemplateId(t.id)}
                   className={`w-full rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
                     selectedTemplateId === t.id
-                      ? "border-brand-400 bg-brand-50 text-brand-800"
-                      : "border-line bg-white text-slate-700 hover:bg-slate-50"
+                      ? "border-brand-400 bg-brand-50 dark:bg-brand-500/10 text-brand-800 dark:text-brand-300"
+                      : "border-line bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="font-medium">{t.label}</span>
@@ -283,7 +283,7 @@ export default function MessagingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 font-sans">
+              <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-xs leading-relaxed text-slate-700 dark:text-slate-200 font-sans">
                 {previewBody}
               </pre>
             </CardContent>
@@ -392,7 +392,7 @@ export default function MessagingPage() {
                 {" "}· click Send on a row to open WhatsApp
               </CardDescription>
               <div className="relative mt-3">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <Input
                   type="search"
                   placeholder="Search recipients by name or phone…"
@@ -435,7 +435,7 @@ export default function MessagingPage() {
                         const hasPhone = !!normalizePhone(r.phone);
                         return (
                           <TR key={i}>
-                            <TD className="font-medium text-slate-900">{r.name}</TD>
+                            <TD className="font-medium text-slate-900 dark:text-slate-100">{r.name}</TD>
                             <TD>
                               {r.phone ? (
                                 <span className="flex items-center gap-1 text-xs text-muted">

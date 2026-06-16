@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Analytics</h1>
           <p className="mt-0.5 text-sm text-muted">Deep-dive into your salon&apos;s performance</p>
         </div>
         <SegmentedControl
@@ -267,37 +267,37 @@ export default function AnalyticsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            <div className="rounded-xl bg-slate-50 p-4">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
               <p className="text-xs font-medium text-muted">Total Wallet Liability</p>
-              <p className="mt-1.5 text-xl font-bold text-slate-900">
+              <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {formatINR(loyaltyStats.totalBalance)}
               </p>
               <p className="mt-0.5 text-xs text-muted">Outstanding balances</p>
             </div>
-            <div className="rounded-xl bg-slate-50 p-4">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
               <p className="text-xs font-medium text-muted">Lifetime Cashback Earned</p>
-              <p className="mt-1.5 text-xl font-bold text-slate-900">
+              <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {formatINR(loyaltyStats.totalEarned)}
               </p>
               <p className="mt-0.5 text-xs text-muted">Across all customers</p>
             </div>
-            <div className="rounded-xl bg-slate-50 p-4">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
               <p className="text-xs font-medium text-muted">Total Redeemed</p>
-              <p className="mt-1.5 text-xl font-bold text-slate-900">
+              <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {formatINR(loyaltyStats.totalRedeemed)}
               </p>
               <p className="mt-0.5 text-xs text-muted">Cashback used in bills</p>
             </div>
-            <div className="rounded-xl bg-slate-50 p-4">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
               <p className="text-xs font-medium text-muted">Redemption Rate</p>
-              <p className="mt-1.5 text-xl font-bold text-slate-900">
+              <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {formatPercent(loyaltyStats.redemptionRate)}
               </p>
               <p className="mt-0.5 text-xs text-muted">Redeemed / earned</p>
             </div>
-            <div className="rounded-xl bg-slate-50 p-4">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
               <p className="text-xs font-medium text-muted">Avg Balance / Customer</p>
-              <p className="mt-1.5 text-xl font-bold text-slate-900">
+              <p className="mt-1.5 text-xl font-bold text-slate-900 dark:text-slate-100">
                 {formatINR(loyaltyStats.avgBalance)}
               </p>
               <p className="mt-0.5 text-xs text-muted">

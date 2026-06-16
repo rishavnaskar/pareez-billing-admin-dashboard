@@ -28,7 +28,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-white transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-white dark:bg-slate-800 transition-transform lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -38,11 +38,11 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               <Scissors className="h-5 w-5" />
             </div>
             <div className="leading-tight">
-              <p className="text-sm font-bold text-slate-900">Pareez Admin</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Pareez Admin</p>
               <p className="text-[11px] text-muted">Owner dashboard</p>
             </div>
           </Link>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 lg:hidden">
+          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -53,7 +53,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             if (!items.length) return null;
             return (
               <div key={group}>
-                <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   {group}
                 </p>
                 <div className="space-y-0.5">
@@ -68,11 +68,11 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                           active
-                            ? "bg-brand-50 text-brand-700"
-                            : "text-slate-600 hover:bg-slate-100"
+                            ? "bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300"
+                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         )}
                       >
-                        <Icon className={cn("h-[18px] w-[18px]", active && "text-brand-600")} />
+                        <Icon className={cn("h-[18px] w-[18px]", active && "text-brand-600 dark:text-brand-400")} />
                         {item.label}
                       </Link>
                     );
