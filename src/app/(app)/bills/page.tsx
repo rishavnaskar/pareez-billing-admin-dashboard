@@ -55,6 +55,7 @@ function BillDetailDialog({
   bill: Bill | null;
   onClose: () => void;
 }) {
+  const { customers } = useData();
   if (!bill) return null;
 
   const serviceTotal = bill.services.reduce(
@@ -63,7 +64,13 @@ function BillDetailDialog({
   );
   // Same WhatsApp intent as the billing app's share: only the bill link
   // (no bill number / amount / services), plus header, thanks and socials.
-  const message = generateBillShareMessage(billPublicUrl(bill.id), bill.walletBalanceAfter);
+  // Use the customer's CURRENT wallet balance (not the bill's historical
+  // walletBalanceAfter, which goes stale once they earn/redeem on later visits)
+  // so the cashback nudge reflects what's actually in their wallet today.
+  const currentWalletBalance = bill.customerId
+    ? customers.find((c) => c.id === bill.customerId)?.wallet.balance
+    : undefined;
+  const message = generateBillShareMessage(billPublicUrl(bill.id), currentWalletBalance);
   const waLink = buildWhatsAppLink(bill.customerPhone, message);
 
   return (
