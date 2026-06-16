@@ -1,6 +1,8 @@
 // WhatsApp "click to chat" intent links + reusable message templates.
 // Matches the billing app's phone handling: 10-digit numbers get the 91 prefix.
 
+import { formatINR } from "./currency";
+
 const SALON_NAME = "Pareez Unisex Professional Salon";
 
 // Public URL of the billing app, which serves the shareable /bill/<id> pages.
@@ -17,12 +19,18 @@ export function billPublicUrl(billId: string): string {
 /**
  * Bill-share message — kept identical to the billing app's
  * generateWhatsAppMessage(): only the bill link, plus header, thanks, socials.
+ * When the customer has cashback in their wallet, a redeem nudge is added.
  */
-export function generateBillShareMessage(billUrl: string): string {
+export function generateBillShareMessage(billUrl: string, walletBalance?: number): string {
+  const cashbackLine =
+    walletBalance && walletBalance > 0
+      ? `\nYou have ${formatINR(walletBalance)} cashback in your Pareez wallet — redeem it on your next visit! 💖\n`
+      : "";
+
   return `Bill from Pareez Unisex Professional Salon
 
 View your bill online: ${billUrl}
-
+${cashbackLine}
 Thank you for visiting Pareez!
 
 Follow us on social media:

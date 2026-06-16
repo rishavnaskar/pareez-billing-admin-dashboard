@@ -63,7 +63,7 @@ function BillDetailDialog({
   );
   // Same WhatsApp intent as the billing app's share: only the bill link
   // (no bill number / amount / services), plus header, thanks and socials.
-  const message = generateBillShareMessage(billPublicUrl(bill.id));
+  const message = generateBillShareMessage(billPublicUrl(bill.id), bill.walletBalanceAfter);
   const waLink = buildWhatsAppLink(bill.customerPhone, message);
 
   return (
