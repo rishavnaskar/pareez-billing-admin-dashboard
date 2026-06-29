@@ -382,7 +382,7 @@ export default function DashboardPage() {
                       </Badge>
                     </TD>
                     <TD className="text-right font-semibold text-slate-800 dark:text-slate-100">
-                      {formatINR(bill.netPayableAmount || bill.totalAmount)}
+                      {formatINR(bill.netPayableAmount ?? bill.totalAmount)}
                     </TD>
                     <TD className="text-right pr-6 text-muted text-xs">
                       {format(bill.createdAt, "dd MMM, HH:mm")}

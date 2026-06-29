@@ -180,9 +180,15 @@ function BillDetailDialog({
             <span>- {formatINR(bill.walletAmountUsed)}</span>
           </div>
         )}
+        {(bill.depositAmountUsed ?? 0) > 0 && (
+          <div className="flex justify-between text-brand-600 dark:text-brand-400">
+            <span>Deposit Used</span>
+            <span>- {formatINR(bill.depositAmountUsed ?? 0)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-base font-bold border-t border-line pt-2 mt-2">
           <span>Net Payable</span>
-          <span>{formatINR(bill.netPayableAmount || bill.totalAmount)}</span>
+          <span>{formatINR(bill.netPayableAmount ?? bill.totalAmount)}</span>
         </div>
         {bill.cashbackEarned > 0 && (
           <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-xs">
@@ -244,7 +250,7 @@ export default function BillsPage() {
     [filtered]
   );
   const netCollected = useMemo(
-    () => filtered.reduce((s, b) => s + (b.netPayableAmount || b.totalAmount), 0),
+    () => filtered.reduce((s, b) => s + (b.netPayableAmount ?? b.totalAmount), 0),
     [filtered]
   );
   const totalCashback = useMemo(
@@ -283,8 +289,12 @@ export default function BillsPage() {
         map.set(key, group);
       }
       group.bills.push(b);
-      group.totals.overall += b.totalAmount;
-      group.totals[b.paymentMethod] += b.totalAmount;
+      // Per-day "Total / Cash / Card / UPI" are money collected at the counter,
+      // so use net payable (after wallet + deposit redemption). The separate
+      // "Gross Revenue" stat card already reports the pre-redemption figure.
+      const net = b.netPayableAmount ?? b.totalAmount;
+      group.totals.overall += net;
+      group.totals[b.paymentMethod] += net;
     }
     return Array.from(map.entries())
       .map(([day, data]) => ({
@@ -512,7 +522,7 @@ export default function BillsPage() {
                               : "—"}
                           </TD>
                           <TD className="text-right font-bold text-slate-900 dark:text-slate-100">
-                            {formatINR(b.netPayableAmount || b.totalAmount)}
+                            {formatINR(b.netPayableAmount ?? b.totalAmount)}
                           </TD>
                           <TD className="text-right text-emerald-600 dark:text-emerald-400 text-xs">
                             {b.cashbackEarned > 0

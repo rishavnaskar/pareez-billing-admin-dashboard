@@ -100,6 +100,7 @@ export interface Bill {
   paymentMethod: PaymentMethod;
   cashbackEarned: number;
   walletAmountUsed: number;
+  depositAmountUsed?: number; // prepaid deposit applied to this bill (own money)
   netPayableAmount: number;
   customerTierAtPurchase: MembershipTier;
   walletBalanceAfter: number;

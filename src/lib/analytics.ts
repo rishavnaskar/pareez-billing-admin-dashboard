@@ -51,7 +51,7 @@ export interface Kpis {
 }
 
 export function computeKpis(bills: Bill[]): Kpis {
-  const revenue = sum(bills, (b) => b.netPayableAmount || b.totalAmount);
+  const revenue = sum(bills, (b) => b.netPayableAmount ?? b.totalAmount);
   const grossSales = sum(bills, (b) => b.totalAmount);
   const billCount = bills.length;
   const uniqueCustomers = new Set(bills.map((b) => b.customerId)).size;
@@ -80,7 +80,7 @@ export function revenueByDay(
     const key = format(b.createdAt, "yyyy-MM-dd");
     const cur = buckets.get(key);
     if (cur) {
-      cur.revenue += b.netPayableAmount || b.totalAmount;
+      cur.revenue += b.netPayableAmount ?? b.totalAmount;
       cur.bills += 1;
     }
   }
@@ -104,7 +104,7 @@ export function revenueByMonth(
     const key = format(b.createdAt, "yyyy-MM");
     const cur = buckets.get(key);
     if (cur) {
-      cur.revenue += b.netPayableAmount || b.totalAmount;
+      cur.revenue += b.netPayableAmount ?? b.totalAmount;
       cur.bills += 1;
     }
   }
@@ -123,7 +123,7 @@ export function paymentMethodBreakdown(
     const subset = bills.filter((b) => b.paymentMethod === method);
     return {
       method,
-      value: sum(subset, (b) => b.netPayableAmount || b.totalAmount),
+      value: sum(subset, (b) => b.netPayableAmount ?? b.totalAmount),
       count: subset.length,
     };
   });
@@ -222,7 +222,7 @@ export function revenueByBranch(
   const map = new Map<string, { branchName: string; revenue: number; bills: number }>();
   for (const b of bills) {
     const cur = map.get(b.branchId) ?? { branchName: b.branchName || b.branchId, revenue: 0, bills: 0 };
-    cur.revenue += b.netPayableAmount || b.totalAmount;
+    cur.revenue += b.netPayableAmount ?? b.totalAmount;
     cur.bills += 1;
     map.set(b.branchId, cur);
   }
@@ -237,7 +237,7 @@ export function salesByWeekday(bills: Bill[]): { day: string; revenue: number; b
   const acc = labels.map((day) => ({ day, revenue: 0, bills: 0 }));
   for (const b of bills) {
     const i = b.createdAt.getDay();
-    acc[i].revenue += b.netPayableAmount || b.totalAmount;
+    acc[i].revenue += b.netPayableAmount ?? b.totalAmount;
     acc[i].bills += 1;
   }
   return acc;
@@ -253,7 +253,7 @@ export function salesByHour(bills: Bill[]): { hour: string; bills: number; reven
   for (const b of bills) {
     const h = b.createdAt.getHours();
     acc[h].bills += 1;
-    acc[h].revenue += b.netPayableAmount || b.totalAmount;
+    acc[h].revenue += b.netPayableAmount ?? b.totalAmount;
   }
   return acc;
 }
@@ -298,11 +298,11 @@ export function periodComparison(
   const prevEnd = new Date(start.getTime() - 1);
   const current = sum(
     bills.filter((b) => isWithinInterval(b.createdAt, { start, end })),
-    (b) => b.netPayableAmount || b.totalAmount
+    (b) => b.netPayableAmount ?? b.totalAmount
   );
   const previous = sum(
     bills.filter((b) => isWithinInterval(b.createdAt, { start: prevStart, end: prevEnd })),
-    (b) => b.netPayableAmount || b.totalAmount
+    (b) => b.netPayableAmount ?? b.totalAmount
   );
   const changePct = previous === 0 ? (current > 0 ? 100 : 0) : ((current - previous) / previous) * 100;
   return { current, previous, changePct };

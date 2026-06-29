@@ -92,6 +92,20 @@ export async function getCustomer(id: string): Promise<Customer | null> {
 
 // ── Bills ────────────────────────────────────────────────────────────────────
 function mapBill(id: string, data: DocumentData): Bill {
+  const totalAmount = num(data.totalAmount);
+  const walletAmountUsed = num(data.walletAmountUsed);
+  const depositAmountUsed = num(data.depositAmountUsed);
+  // netPayableAmount (= total − wallet − deposit) is stored on every bill the
+  // billing app writes; a fully wallet/deposit-funded bill legitimately stores
+  // 0. Only legacy bills predating the field are missing it — fall back to the
+  // computed value for those. Crucially, do NOT pipe a missing field through
+  // num() (which yields 0): that would make a legacy bill indistinguishable
+  // from a real 0 and let downstream `?? totalAmount` guards zero it out.
+  const rawNet = data.netPayableAmount;
+  const netPayableAmount =
+    typeof rawNet === "number" && Number.isFinite(rawNet)
+      ? rawNet
+      : totalAmount - walletAmountUsed - depositAmountUsed;
   return {
     id,
     billNumber: data.billNumber ?? "",
@@ -104,11 +118,12 @@ function mapBill(id: string, data: DocumentData): Bill {
     services: Array.isArray(data.services) ? data.services : [],
     subtotal: num(data.subtotal),
     discountAmount: num(data.discountAmount),
-    totalAmount: num(data.totalAmount),
+    totalAmount,
     paymentMethod: data.paymentMethod ?? "cash",
     cashbackEarned: num(data.cashbackEarned),
-    walletAmountUsed: num(data.walletAmountUsed),
-    netPayableAmount: num(data.netPayableAmount),
+    walletAmountUsed,
+    depositAmountUsed,
+    netPayableAmount,
     customerTierAtPurchase: data.customerTierAtPurchase ?? "bronze",
     walletBalanceAfter: num(data.walletBalanceAfter),
     cashbackRateApplied: data.cashbackRateApplied,

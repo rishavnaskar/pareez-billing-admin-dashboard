@@ -204,7 +204,7 @@ function CustomerDrawer({
                   <TD className="whitespace-nowrap text-xs">
                     {format(b.createdAt, "dd MMM yyyy")}
                   </TD>
-                  <TD className="font-semibold">{formatINR(b.totalAmount)}</TD>
+                  <TD className="font-semibold">{formatINR(b.netPayableAmount ?? b.totalAmount)}</TD>
                   <TD>
                     <Badge tone="slate" className="uppercase">
                       {b.paymentMethod}
