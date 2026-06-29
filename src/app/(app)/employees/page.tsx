@@ -58,11 +58,12 @@ const employeeColumns: TableColumn<Employee>[] = [
 // ── employee incentive (commission) computation ───────────────────────────────
 // Bills attribute work via the free-text staffName on each service. We match an
 // employee by name (case-insensitive) and base commission on the net service
-// amount (price − discount) of the services they performed.
+// amount after ALL discounts — per-service discounts plus the employee's
+// pro-rata share of the bill-level "Additional Discount".
 interface IncentiveBill {
   bill: Bill;
   services: ServiceItem[]; // this employee's services on the bill
-  serviceAmount: number; // net amount of those services
+  serviceAmount: number; // net amount of those services, after all discounts
 }
 
 interface IncentiveMonth {
@@ -96,13 +97,28 @@ function buildIncentiveIndex(bills: Bill[]): IncentiveIndex {
     }
     if (byStaff.size === 0) continue;
 
+    // The bill-level "Additional Discount" (bill.discountAmount) isn't tied to a
+    // specific service, so spread it across the bill's services pro-rata by
+    // their post-line-discount value. Scaling each service by this factor makes
+    // every employee's commission base the true final amount after ALL discounts
+    // (the bill's totalAmount), not just the per-service discounts.
+    const billServiceNet = bill.services.reduce(
+      (sum, s) => sum + (s.price - (s.discountAmount || 0)),
+      0
+    );
+    const discountFactor =
+      billServiceNet > 0
+        ? Math.max(0, (billServiceNet - (bill.discountAmount || 0)) / billServiceNet)
+        : 0;
+
     const monthKey = format(bill.createdAt, "yyyy-MM");
     const monthLabel = format(bill.createdAt, "MMMM yyyy");
     for (const [staffKey, services] of byStaff) {
-      const serviceAmount = services.reduce(
-        (sum, s) => sum + (s.price - (s.discountAmount || 0)),
-        0
-      );
+      const serviceAmount =
+        services.reduce(
+          (sum, s) => sum + (s.price - (s.discountAmount || 0)),
+          0
+        ) * discountFactor;
       let months = index.get(staffKey);
       if (!months) {
         months = new Map();
@@ -794,8 +810,9 @@ export default function EmployeesPage() {
                 onChange={(e) => setField("commissionPercent", e.target.value)}
               />
               <p className="mt-1 text-xs text-muted">
-                Applied to the net amount (price − discount) of every service
-                this employee performs. Used to compute their monthly incentive.
+                Applied to the net amount of every service this employee
+                performs, after all discounts (per-service and the bill&apos;s
+                additional discount). Used to compute their monthly incentive.
               </p>
             </div>
 
@@ -872,7 +889,7 @@ export default function EmployeesPage() {
         title={`Incentive — ${incentiveTarget?.name ?? ""}`}
         description={
           incentiveTarget?.commissionPercent
-            ? `${incentiveTarget.commissionPercent}% commission on net service amount`
+            ? `${incentiveTarget.commissionPercent}% commission on net service amount (after all discounts)`
             : "No commission % set for this employee yet"
         }
         footer={
