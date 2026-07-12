@@ -12,6 +12,8 @@ import {
   Coins,
   Unlink,
   Info,
+  Gift,
+  Wallet,
 } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,11 +23,13 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/misc";
+import { Switch } from "@/components/ui/switch";
 import {
   getBranchTierConfig,
   getBranchCashbackConfig,
   saveBranchTierConfig,
   saveBranchCashbackBasics,
+  saveBranchCashbackToggles,
 } from "@/lib/firestore";
 import { getSheetWebhook, setSheetWebhook, APPS_SCRIPT_SNIPPET } from "@/lib/google-sheets";
 
@@ -53,9 +57,17 @@ export default function SettingsPage() {
     upi: true,
   });
   const [dayConfigPresent, setDayConfigPresent] = useState(false);
+  const [toggles, setToggles] = useState({
+    cashbackEnabled: true,
+    redemptionEnabled: true,
+  });
 
   const [savingTier, setSavingTier] = useState(false);
   const [savingCashback, setSavingCashback] = useState(false);
+  // Which master switch is mid-save (null when idle) — disables it while writing.
+  const [savingToggle, setSavingToggle] = useState<
+    "cashbackEnabled" | "redemptionEnabled" | null
+  >(null);
 
   // ── Section 3: Google Sheets ─────────────────────────────────────────────────
   const [webhookUrl, setWebhookUrl] = useState("");
@@ -103,10 +115,15 @@ export default function SettingsPage() {
         });
         setEligibleMethods(cashbackCfg.eligiblePaymentMethodsForDiscount);
         setDayConfigPresent(Object.keys(cashbackCfg.dayConfig ?? {}).length > 0);
+        setToggles({
+          cashbackEnabled: cashbackCfg.cashbackEnabled,
+          redemptionEnabled: cashbackCfg.redemptionEnabled,
+        });
       } else {
         setCashback(DEFAULT_CASHBACK);
         setEligibleMethods({ cash: true, card: true, upi: true });
         setDayConfigPresent(false);
+        setToggles({ cashbackEnabled: true, redemptionEnabled: true });
       }
     } catch (err) {
       toast(`Failed to load branch config: ${(err as Error).message}`, "error");
@@ -154,6 +171,27 @@ export default function SettingsPage() {
       toast(`Save failed: ${(err as Error).message}`, "error");
     } finally {
       setSavingCashback(false);
+    }
+  }
+
+  async function handleToggle(
+    key: "cashbackEnabled" | "redemptionEnabled",
+    value: boolean,
+  ) {
+    if (!selectedBranchId) return;
+    const previous = toggles[key];
+    // Optimistic update so the switch responds instantly; revert on failure.
+    setToggles((prev) => ({ ...prev, [key]: value }));
+    setSavingToggle(key);
+    try {
+      await saveBranchCashbackToggles(selectedBranchId, { [key]: value });
+      const label = key === "cashbackEnabled" ? "Cashback earning" : "Wallet redemption";
+      toast(`${label} ${value ? "enabled" : "disabled"} for this branch.`, "success");
+    } catch (err) {
+      setToggles((prev) => ({ ...prev, [key]: previous }));
+      toast(`Save failed: ${(err as Error).message}`, "error");
+    } finally {
+      setSavingToggle(null);
     }
   }
 
@@ -273,6 +311,80 @@ export default function SettingsPage() {
             </div>
           ) : (
             <>
+              {/* Master switches: cashback earning & wallet redemption */}
+              <div className="space-y-3 rounded-xl border border-line bg-slate-50/60 dark:bg-slate-800/60 p-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Cashback & Redemption Controls
+                  </h3>
+                  <p className="mt-0.5 text-xs text-muted">
+                    Master switches for this branch. Turning one off takes effect
+                    immediately in the billing app — new bills won&apos;t earn cashback /
+                    can&apos;t redeem wallet balance. Past bills are unaffected.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-white dark:bg-slate-900/60 px-4 py-3">
+                  <div className="flex items-start gap-3">
+                    <Gift className="mt-0.5 h-5 w-5 text-emerald-500" />
+                    <div>
+                      <Label htmlFor="toggle-cashback" className="text-sm font-medium">
+                        Cashback earning
+                      </Label>
+                      <p className="text-xs text-muted">
+                        Credit cashback to customers&apos; wallets on new bills.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={toggles.cashbackEnabled ? "green" : "slate"}>
+                      {toggles.cashbackEnabled ? "Enabled" : "Disabled"}
+                    </Badge>
+                    {savingToggle === "cashbackEnabled" ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Switch
+                        id="toggle-cashback"
+                        checked={toggles.cashbackEnabled}
+                        onCheckedChange={(v) => handleToggle("cashbackEnabled", v)}
+                        disabled={!selectedBranchId || savingToggle !== null}
+                        aria-label="Toggle cashback earning"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-line bg-white dark:bg-slate-900/60 px-4 py-3">
+                  <div className="flex items-start gap-3">
+                    <Wallet className="mt-0.5 h-5 w-5 text-blue-500" />
+                    <div>
+                      <Label htmlFor="toggle-redemption" className="text-sm font-medium">
+                        Wallet redemption
+                      </Label>
+                      <p className="text-xs text-muted">
+                        Let customers pay using their wallet balance on new bills.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={toggles.redemptionEnabled ? "green" : "slate"}>
+                      {toggles.redemptionEnabled ? "Enabled" : "Disabled"}
+                    </Badge>
+                    {savingToggle === "redemptionEnabled" ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Switch
+                        id="toggle-redemption"
+                        checked={toggles.redemptionEnabled}
+                        onCheckedChange={(v) => handleToggle("redemptionEnabled", v)}
+                        disabled={!selectedBranchId || savingToggle !== null}
+                        aria-label="Toggle wallet redemption"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Tier thresholds */}
               <div className="space-y-4 rounded-xl border border-line bg-slate-50/60 dark:bg-slate-800/60 p-4">
                 <div>

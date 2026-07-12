@@ -309,6 +309,9 @@ export async function getBranchCashbackConfig(
       upi: true,
     },
     dayConfig: data.dayConfig ?? {},
+    // Absent means enabled (branches configured before the switches existed).
+    cashbackEnabled: data.cashbackEnabled !== false,
+    redemptionEnabled: data.redemptionEnabled !== false,
     updatedAt: toDate(data.updatedAt),
   };
 }
@@ -342,6 +345,23 @@ export async function saveBranchCashbackBasics(
   await setDoc(
     doc(db, "branches", branchId, "config", "cashbackConfig"),
     { branchId, ...data, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}
+
+// Master on/off switches for cashback earning and wallet redemption. Merge-write
+// so it never disturbs the rest of the cashback config (basics, day/tier matrix,
+// eligible payment methods). Honoured by the billing app's resolveRates().
+export async function saveBranchCashbackToggles(
+  branchId: string,
+  data: { cashbackEnabled?: boolean; redemptionEnabled?: boolean }
+): Promise<void> {
+  const patch = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
+  await setDoc(
+    doc(db, "branches", branchId, "config", "cashbackConfig"),
+    { branchId, ...patch, updatedAt: serverTimestamp() },
     { merge: true }
   );
 }

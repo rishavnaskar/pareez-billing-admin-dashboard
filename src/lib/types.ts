@@ -40,6 +40,10 @@ export interface BranchCashbackConfig {
   minBillForCashback: number;
   eligiblePaymentMethodsForDiscount: Record<PaymentMethod, boolean>;
   dayConfig: Record<DayOfWeek, Record<MembershipTier, TierRates>>;
+  // Master on/off switches (default true when absent). Toggled here in the
+  // dashboard; honoured by the billing app's resolveRates().
+  cashbackEnabled: boolean;
+  redemptionEnabled: boolean;
   updatedAt: Date;
 }
 
